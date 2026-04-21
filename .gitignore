@@ -1,0 +1,59 @@
+# Carpetas de build
+Binaries/
+DerivedDataCache/
+Intermediate/
+Saved/
+Build/
+
+# Visual Studio / Rider
+.vs/
+.vsconfig
+*.sln
+*.suo
+*.xcodeproj
+*.xcworkspace
+.idea/
+*.VC.db
+*.opensdf
+*.opendb
+*.sdf
+*.user
+
+# Archivos del sistema
+Thumbs.db
+.DS_Store
+
+# Paquetes temporales
+*.tmp
+
+# Logs
+*.log# Carpetas de build
+Binaries/
+DerivedDataCache/
+Intermediate/
+Saved/
+Build/
+
+# Visual Studio / Rider
+.vs/
+.vsconfig
+*.sln
+*.suo
+*.xcodeproj
+*.xcworkspace
+.idea/
+*.VC.db
+*.opensdf
+*.opendb
+*.sdf
+*.user
+
+# Archivos del sistema
+Thumbs.db
+.DS_Store
+
+# Paquetes temporales
+*.tmp
+
+# Logs
+*.log
