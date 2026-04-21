@@ -1,0 +1,22 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "{8807AC6D-4A4E-0F0E-B9D1-C89884F29217}",
+	"Category": "",
+	"Description": "",
+	"Modules": [
+		{
+			"Name": "ProtoDungeonSW2",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "ModelingToolsEditorMode",
+			"Enabled": true,
+			"TargetAllowList": [
+				"Editor"
+			]
+		}
+	]
+}
