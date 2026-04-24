@@ -30,6 +30,9 @@ ADPPlayerCharacter::ADPPlayerCharacter()
 	SpringArm->bInheritYaw      = false;
 	SpringArm->bInheritRoll     = false;
 
+    // NUEVA LÍNEA: rotación absoluta (no hereda la del Character)
+    SpringArm->SetUsingAbsoluteRotation(true);
+
 	// Cámara anclada al extremo del brazo
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
@@ -69,12 +72,11 @@ void ADPPlayerCharacter::Move(const FInputActionValue& Value)
 		return;
 	}
 
-	// Proyectar los ejes de movimiento sobre el yaw de la cámara isométrica
-	// para que adelante/atrás/izquierda/derecha sean consistentes con la vista
 	const FRotator CameraYawRotator(0.f, SpringArm->GetComponentRotation().Yaw, 0.f);
 	const FVector ForwardDirection = FRotationMatrix(CameraYawRotator).GetUnitAxis(EAxis::X);
-	const FVector RightDirection   = FRotationMatrix(CameraYawRotator).GetUnitAxis(EAxis::Y);
+	const FVector RightDirection = FRotationMatrix(CameraYawRotator).GetUnitAxis(EAxis::Y);
 
 	AddMovementInput(ForwardDirection, MovementVector.Y);
-	AddMovementInput(RightDirection,   MovementVector.X);
+	AddMovementInput(RightDirection, MovementVector.X);
+
 }
