@@ -4,6 +4,7 @@ DerivedDataCache/
 Intermediate/
 Saved/
 Build/
+Config/DefaultInput.ini
 
 # Visual Studio / Rider
 .vs/
