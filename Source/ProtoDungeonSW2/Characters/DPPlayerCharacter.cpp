@@ -1,4 +1,5 @@
 #include "DPPlayerCharacter.h"
+#include "../Combat/DPCombatComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -37,6 +38,9 @@ ADPPlayerCharacter::ADPPlayerCharacter()
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
 	Camera->FieldOfView = 60.f;
+
+	// Componente de combate
+	CombatComponent = CreateDefaultSubobject<UDPCombatComponent>(TEXT("CombatComponent"));
 }
 
 void ADPPlayerCharacter::BeginPlay()
@@ -61,6 +65,8 @@ void ADPPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	if (UEnhancedInputComponent* EIC = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
 		EIC->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ADPPlayerCharacter::Move);
+		EIC->BindAction(AttackAction, ETriggerEvent::Started, this, &ADPPlayerCharacter::OnAttack);
+		EIC->BindAction(SpecialAttackAction, ETriggerEvent::Started, this, &ADPPlayerCharacter::OnSpecialAttack);
 	}
 }
 
@@ -80,4 +86,20 @@ void ADPPlayerCharacter::Move(const FInputActionValue& Value)
 	AddMovementInput(ForwardDirection, MovementVector.Y);
 	AddMovementInput(RightDirection, MovementVector.X);
 
+}
+
+void ADPPlayerCharacter::OnAttack(const FInputActionValue& Value)
+{
+	if (CombatComponent)
+	{
+		CombatComponent->TryBasicAttack();
+	}
+}
+
+void ADPPlayerCharacter::OnSpecialAttack(const FInputActionValue& Value)
+{
+	if (CombatComponent)
+	{
+		CombatComponent->TrySpecialAttack();
+	}
 }
