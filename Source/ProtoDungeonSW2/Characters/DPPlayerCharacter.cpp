@@ -23,8 +23,8 @@ ADPPlayerCharacter::ADPPlayerCharacter()
 	// Brazo del resorte con ángulo isométrico fijo
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetupAttachment(RootComponent);
-	SpringArm->TargetArmLength = 1200.f;
-	SpringArm->SetRelativeRotation(FRotator(-50.f, -45.f, 0.f));
+	SpringArm->TargetArmLength = 1500.f;
+	SpringArm->SetRelativeRotation(FRotator(-30.f, -45.f, 0.f));
 	SpringArm->bDoCollisionTest = false;
 	SpringArm->bInheritPitch    = false;
 	SpringArm->bInheritYaw      = false;
@@ -36,6 +36,7 @@ ADPPlayerCharacter::ADPPlayerCharacter()
 	// Cámara anclada al extremo del brazo
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
+	Camera->FieldOfView = 60.f;
 }
 
 void ADPPlayerCharacter::BeginPlay()
