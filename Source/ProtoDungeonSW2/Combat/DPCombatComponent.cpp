@@ -16,6 +16,17 @@ UDPCombatComponent::UDPCombatComponent()
 
 void UDPCombatComponent::TryBasicAttack()
 {
+	if (!CanBasicAttack())
+	{
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor(150, 150, 150), TEXT("Basic on cooldown"));
+		}
+		return;
+	}
+
+	LastBasicAttackTime = GetWorld()->GetTimeSeconds();
+
 	if (GEngine)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, TEXT("Basic Attack!"));
@@ -26,12 +37,60 @@ void UDPCombatComponent::TryBasicAttack()
 
 void UDPCombatComponent::TrySpecialAttack()
 {
+	if (!CanSpecialAttack())
+	{
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor(150, 150, 150), TEXT("Special on cooldown"));
+		}
+		return;
+	}
+
+	LastSpecialAttackTime = GetWorld()->GetTimeSeconds();
+
 	if (GEngine)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Orange, TEXT("Special Attack!"));
 	}
 
 	PerformAttack(SpecialAttackDamage, SpecialAttackRange);
+}
+
+bool UDPCombatComponent::CanBasicAttack() const
+{
+	const UWorld* World = GetWorld();
+	if (!World)
+	{
+		return false;
+	}
+
+	const float Now = World->GetTimeSeconds();
+
+	// Bloqueado por su propio cooldown
+	if (Now - LastBasicAttackTime < BasicAttackCooldown)
+	{
+		return false;
+	}
+
+	// Bloqueado mientras el especial sigue activo (lockout global)
+	if (Now - LastSpecialAttackTime < SpecialAttackCooldown)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+bool UDPCombatComponent::CanSpecialAttack() const
+{
+	const UWorld* World = GetWorld();
+	if (!World)
+	{
+		return false;
+	}
+
+	const float Now = World->GetTimeSeconds();
+	return (Now - LastSpecialAttackTime) >= SpecialAttackCooldown;
 }
 
 void UDPCombatComponent::PerformAttack(float Damage, float Range)
