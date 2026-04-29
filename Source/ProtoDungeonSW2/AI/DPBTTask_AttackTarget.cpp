@@ -1,12 +1,27 @@
 #include "DPBTTask_AttackTarget.h"
 #include "AIController.h"
+#include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "BehaviorTree/BlackboardData.h"
 #include "../Combat/DPCombatComponent.h"
 #include "../Characters/DPEnemyBase.h"
 
 UDPBTTask_AttackTarget::UDPBTTask_AttackTarget()
 {
 	NodeName = TEXT("Attack Target");
+
+	// Filtro de tipo en el editor: TargetActorKey solo acepta keys Object/AActor
+	TargetActorKey.AddObjectFilter(this, GET_MEMBER_NAME_CHECKED(UDPBTTask_AttackTarget, TargetActorKey), AActor::StaticClass());
+}
+
+void UDPBTTask_AttackTarget::InitializeFromAsset(UBehaviorTree& Asset)
+{
+	Super::InitializeFromAsset(Asset);
+
+	if (UBlackboardData* BBAsset = GetBlackboardAsset())
+	{
+		TargetActorKey.ResolveSelectedKey(*BBAsset);
+	}
 }
 
 EBTNodeResult::Type UDPBTTask_AttackTarget::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
@@ -38,7 +53,7 @@ EBTNodeResult::Type UDPBTTask_AttackTarget::ExecuteTask(UBehaviorTreeComponent& 
 		return EBTNodeResult::Failed;
 	}
 
-	AActor* Target = Cast<AActor>(BBComp->GetValueAsObject(TEXT("TargetActor")));
+	AActor* Target = Cast<AActor>(BBComp->GetValueAsObject(TargetActorKey.SelectedKeyName));
 	if (!Target)
 	{
 		return EBTNodeResult::Failed;
