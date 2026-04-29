@@ -4,6 +4,9 @@
 #include "GameFramework/Character.h"
 #include "DPCharacterBase.generated.h"
 
+// Delegate disparado cuando cambia la vida; los listeners (UI, BPs) reciben los valores actualizados
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnHealthChangedSignature, float, CurrentHealth, float, MaxHealth);
+
 UCLASS()
 class PROTODUNGEONSW2_API ADPCharacterBase : public ACharacter
 {
@@ -21,11 +24,18 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Stats")
 	bool IsDead() const { return bIsDead; }
 
+	// Listeners (UI, BP) se suscriben aquí para reaccionar a cambios de vida
+	UPROPERTY(BlueprintAssignable, Category = "Stats")
+	FOnHealthChangedSignature OnHealthChanged;
+
 protected:
 	virtual void BeginPlay() override;
 
 	// Hook de muerte: las clases derivadas pueden override para ragdoll, despawn, drops, etc.
 	virtual void OnDeath();
+
+	// Dispara el delegate OnHealthChanged con los valores actuales de vida.
+	virtual void BroadcastHealthChange();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Stats", meta = (ClampMin = "1.0"))
 	float MaxHealth = 100.f;

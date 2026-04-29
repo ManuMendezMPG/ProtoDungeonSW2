@@ -13,6 +13,9 @@ void ADPCharacterBase::BeginPlay()
 
 	// Inicializar vida actual al máximo al comenzar el juego
 	CurrentHealth = MaxHealth;
+
+	// Notificar el valor inicial a cualquier listener ya suscrito (p.ej. widget de UI)
+	BroadcastHealthChange();
 }
 
 float ADPCharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -37,10 +40,13 @@ float ADPCharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 			GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, Msg);
 		}
 
+		BroadcastHealthChange();
+
 		if (CurrentHealth <= 0.f)
 		{
 			CurrentHealth = 0.f;
 			bIsDead = true;
+			BroadcastHealthChange();
 			OnDeath();
 		}
 	}
@@ -69,4 +75,9 @@ void ADPCharacterBase::OnDeath()
 	{
 		Movement->DisableMovement();
 	}
+}
+
+void ADPCharacterBase::BroadcastHealthChange()
+{
+	OnHealthChanged.Broadcast(CurrentHealth, MaxHealth);
 }
