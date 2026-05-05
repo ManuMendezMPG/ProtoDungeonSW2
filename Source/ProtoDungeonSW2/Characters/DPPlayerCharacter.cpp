@@ -24,8 +24,8 @@ ADPPlayerCharacter::ADPPlayerCharacter()
 	// Brazo del resorte con ángulo isométrico fijo
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetupAttachment(RootComponent);
-	SpringArm->TargetArmLength = 1500.f;
-	SpringArm->SetRelativeRotation(FRotator(-30.f, -45.f, 0.f));
+	SpringArm->TargetArmLength = 2000.f;
+	SpringArm->SetRelativeRotation(FRotator(-50.f, -45.f, 0.f));
 	SpringArm->bDoCollisionTest = false;
 	SpringArm->bInheritPitch    = false;
 	SpringArm->bInheritYaw      = false;
