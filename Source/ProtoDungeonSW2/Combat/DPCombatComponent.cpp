@@ -1,8 +1,10 @@
 #include "DPCombatComponent.h"
 #include "../Characters/DPCharacterBase.h"
+#include "Animation/AnimMontage.h"
 #include "Engine/Engine.h"
 #include "Engine/World.h"
 #include "GameFramework/Actor.h"
+#include "GameFramework/Character.h"
 #include "GameFramework/Pawn.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -12,6 +14,8 @@ UDPCombatComponent::UDPCombatComponent()
 {
 	// De momento no necesita tick
 	PrimaryComponentTick.bCanEverTick = false;
+
+	CurrentAttackType = EDPAttackType::None;
 }
 
 void UDPCombatComponent::TryBasicAttack()
@@ -32,7 +36,21 @@ void UDPCombatComponent::TryBasicAttack()
 		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, TEXT("Basic Attack!"));
 	}
 
-	PerformAttack(BasicAttackDamage, BasicAttackRange);
+	if (BasicAttackMontage)
+	{
+		// Flujo con animación: reproducir montage y esperar al notify para aplicar daño
+		ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
+		if (OwnerCharacter)
+		{
+			OwnerCharacter->PlayAnimMontage(BasicAttackMontage);
+		}
+		CurrentAttackType = EDPAttackType::Basic;
+	}
+	else
+	{
+		// Flujo legacy (sin montage, p.ej. enemigos): daño inmediato
+		PerformAttack(BasicAttackDamage, BasicAttackRange);
+	}
 }
 
 void UDPCombatComponent::TrySpecialAttack()
@@ -53,7 +71,36 @@ void UDPCombatComponent::TrySpecialAttack()
 		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Orange, TEXT("Special Attack!"));
 	}
 
-	PerformAttack(SpecialAttackDamage, SpecialAttackRange);
+	if (SpecialAttackMontage)
+	{
+		// Flujo con animación: reproducir montage y esperar al notify para aplicar daño
+		ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
+		if (OwnerCharacter)
+		{
+			OwnerCharacter->PlayAnimMontage(SpecialAttackMontage);
+		}
+		CurrentAttackType = EDPAttackType::Special;
+	}
+	else
+	{
+		// Flujo legacy (sin montage): daño inmediato
+		PerformAttack(SpecialAttackDamage, SpecialAttackRange);
+	}
+}
+
+void UDPCombatComponent::OnDamageNotify()
+{
+	if (CurrentAttackType == EDPAttackType::Basic)
+	{
+		PerformAttack(BasicAttackDamage, BasicAttackRange);
+	}
+	else if (CurrentAttackType == EDPAttackType::Special)
+	{
+		PerformAttack(SpecialAttackDamage, SpecialAttackRange);
+	}
+
+	// Reset state — el siguiente ataque pondrá el tipo correcto
+	CurrentAttackType = EDPAttackType::None;
 }
 
 bool UDPCombatComponent::CanBasicAttack() const

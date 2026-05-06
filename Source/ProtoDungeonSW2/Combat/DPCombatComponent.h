@@ -4,6 +4,16 @@
 #include "Components/ActorComponent.h"
 #include "DPCombatComponent.generated.h"
 
+class UAnimMontage;
+
+UENUM(BlueprintType)
+enum class EDPAttackType : uint8
+{
+	None,
+	Basic,
+	Special
+};
+
 UCLASS(Blueprintable, ClassGroup = (Combat), meta = (BlueprintSpawnableComponent))
 class PROTODUNGEONSW2_API UDPCombatComponent : public UActorComponent
 {
@@ -19,6 +29,10 @@ public:
 	// Ataque especial (gesto JoyCon, simulado en PC)
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void TrySpecialAttack();
+
+	// Llamada desde Anim Notify cuando el momento de daño de un ataque debe aplicarse.
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void OnDamageNotify();
 
 	// Daño del ataque básico
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
@@ -52,6 +66,16 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (ClampMin = "0.0"))
 	float SpecialAttackCooldown = 1.0f;
 
+	// Montage del ataque básico. Si está asignado, TryBasicAttack lo reproduce y el daño
+	// se aplica vía OnDamageNotify (llamado desde un Anim Notify). Si es nullptr, el daño
+	// se aplica al instante (flujo legacy usado por enemigos sin montage).
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat|Animation")
+	TObjectPtr<UAnimMontage> BasicAttackMontage;
+
+	// Montage del ataque especial (mismo patrón que BasicAttackMontage).
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat|Animation")
+	TObjectPtr<UAnimMontage> SpecialAttackMontage;
+
 	// ¿Puede dispararse ahora un ataque básico? (false si su propio CD activo o si el especial bloquea)
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Combat")
 	bool CanBasicAttack() const;
@@ -63,6 +87,11 @@ public:
 protected:
 	// Lógica compartida: detecta personajes en una esfera delante del owner y les aplica daño
 	void PerformAttack(float Damage, float Range);
+
+	// Tipo de ataque actualmente en curso (None si ningún montage activo). Lo consulta
+	// OnDamageNotify para saber qué daño/rango aplicar.
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat|State")
+	EDPAttackType CurrentAttackType;
 
 private:
 	// Estado runtime: timestamp del último uso (en segundos de juego). Inicializado lejos
