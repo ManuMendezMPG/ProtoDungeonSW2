@@ -4,6 +4,8 @@
 #include "GameFramework/Character.h"
 #include "DPCharacterBase.generated.h"
 
+class UAnimMontage;
+
 // Delegate disparado cuando cambia la vida; los listeners (UI, BPs) reciben los valores actualizados
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnHealthChangedSignature, float, CurrentHealth, float, MaxHealth);
 
@@ -28,6 +30,14 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Stats")
 	FOnHealthChangedSignature OnHealthChanged;
 
+	// Reacción al recibir daño desde delante
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat|Animation")
+	TObjectPtr<UAnimMontage> HitReactFrontMontage;
+
+	// Reacción al recibir daño desde detrás
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat|Animation")
+	TObjectPtr<UAnimMontage> HitReactBackMontage;
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -36,6 +46,9 @@ protected:
 
 	// Dispara el delegate OnHealthChanged con los valores actuales de vida.
 	virtual void BroadcastHealthChange();
+
+	// Reproduce el AnimMontage de hit reaction apropiado según la dirección del atacante.
+	virtual void PlayHitReaction(AActor* DamageCauser);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Stats", meta = (ClampMin = "1.0"))
 	float MaxHealth = 100.f;

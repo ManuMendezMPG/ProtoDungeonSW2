@@ -1,4 +1,7 @@
 #include "DPCharacterBase.h"
+#include "Animation/AnimInstance.h"
+#include "Animation/AnimMontage.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "Engine/Engine.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
@@ -42,6 +45,12 @@ float ADPCharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 
 		BroadcastHealthChange();
 
+		// Hit reaction solo si sobrevive el golpe (la muerte gestiona su propia animación)
+		if (CurrentHealth > 0.f)
+		{
+			PlayHitReaction(DamageCauser);
+		}
+
 		if (CurrentHealth <= 0.f)
 		{
 			CurrentHealth = 0.f;
@@ -80,4 +89,40 @@ void ADPCharacterBase::OnDeath()
 void ADPCharacterBase::BroadcastHealthChange()
 {
 	OnHealthChanged.Broadcast(CurrentHealth, MaxHealth);
+}
+
+void ADPCharacterBase::PlayHitReaction(AActor* DamageCauser)
+{
+	// Default a Front: si no hay causer (autodaño, fallthrough, etc.) o no se puede determinar dirección
+	UAnimMontage* MontageToPlay = HitReactFrontMontage;
+
+	if (DamageCauser != nullptr)
+	{
+		// Vector desde el defensor al atacante, normalizado (GetSafeNormal evita div/0 si coinciden)
+		const FVector ToAttacker = (DamageCauser->GetActorLocation() - GetActorLocation()).GetSafeNormal();
+		const FVector Forward    = GetActorForwardVector();
+
+		// Dot > 0 => atacante delante; Dot < 0 => detrás. Umbral en 90°.
+		const float DotProduct = FVector::DotProduct(Forward, ToAttacker);
+
+		if (DotProduct < 0.f && HitReactBackMontage != nullptr)
+		{
+			MontageToPlay = HitReactBackMontage;
+		}
+	}
+
+	// Detener cualquier montage en curso para que un nuevo PlayAnimMontage no sea ignorado
+	// (PlayAnimMontage no reemplaza un montage que aún se está reproduciendo)
+	if (USkeletalMeshComponent* MeshComp = GetMesh())
+	{
+		if (UAnimInstance* AnimInstance = MeshComp->GetAnimInstance())
+		{
+			AnimInstance->Montage_Stop(0.1f);
+		}
+	}
+
+	if (MontageToPlay != nullptr)
+	{
+		PlayAnimMontage(MontageToPlay);
+	}
 }
