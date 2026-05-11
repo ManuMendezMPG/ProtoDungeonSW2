@@ -5,6 +5,7 @@
 #include "DPCharacterBase.generated.h"
 
 class UAnimMontage;
+class USoundBase;
 
 // Delegate disparado cuando cambia la vida; los listeners (UI, BPs) reciben los valores actualizados
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnHealthChangedSignature, float, CurrentHealth, float, MaxHealth);
@@ -37,6 +38,11 @@ public:
 	// Reacción al recibir daño desde detrás
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat|Animation")
 	TObjectPtr<UAnimMontage> HitReactBackMontage;
+
+	// Sonido reproducido en la posición del actor al recibir daño no letal (gruñido).
+	// Si es nullptr, no suena nada. La muerte tiene su propio feedback.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat|Audio")
+	TObjectPtr<USoundBase> DamageSound;
 
 protected:
 	virtual void BeginPlay() override;

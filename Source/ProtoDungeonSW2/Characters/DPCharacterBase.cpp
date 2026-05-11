@@ -4,6 +4,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/Engine.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 ADPCharacterBase::ADPCharacterBase()
 {
@@ -49,6 +50,12 @@ float ADPCharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 		if (CurrentHealth > 0.f)
 		{
 			PlayHitReaction(DamageCauser);
+
+			// Grunt de daño no letal en la posición del actor (3D)
+			if (DamageSound)
+			{
+				UGameplayStatics::PlaySoundAtLocation(GetWorld(), DamageSound, GetActorLocation());
+			}
 		}
 
 		if (CurrentHealth <= 0.f)

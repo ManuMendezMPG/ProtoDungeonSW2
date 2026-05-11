@@ -5,6 +5,7 @@
 #include "DPCombatComponent.generated.h"
 
 class UAnimMontage;
+class USoundBase;
 
 UENUM(BlueprintType)
 enum class EDPAttackType : uint8
@@ -75,6 +76,11 @@ public:
 	// Montage del ataque especial (mismo patrón que BasicAttackMontage).
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat|Animation")
 	TObjectPtr<UAnimMontage> SpecialAttackMontage;
+
+	// Sonido reproducido en la posición de cada actor impactado en PerformAttack.
+	// Si es nullptr o el ataque no impacta a nadie, no se reproduce nada.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat|Audio")
+	TObjectPtr<USoundBase> HitImpactSound;
 
 	// ¿Puede dispararse ahora un ataque básico? (false si su propio CD activo o si el especial bloquea)
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Combat")

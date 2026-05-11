@@ -196,6 +196,12 @@ void UDPCombatComponent::PerformAttack(float Damage, float Range)
 		{
 			UGameplayStatics::ApplyDamage(Character, Damage, OwnerController, OwnerActor, nullptr);
 			++HitCount;
+
+			// Feedback de impacto en la posición del objetivo (una vez por target)
+			if (HitImpactSound)
+			{
+				UGameplayStatics::PlaySoundAtLocation(World, HitImpactSound, Character->GetActorLocation());
+			}
 		}
 	}
 
