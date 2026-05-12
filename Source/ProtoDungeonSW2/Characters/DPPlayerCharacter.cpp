@@ -39,36 +39,8 @@ ADPPlayerCharacter::ADPPlayerCharacter()
 	Camera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
 	Camera->FieldOfView = 60.f;
 
-	// Cámara cenital (top-down) para modo handheld
-	TopDownSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("TopDownSpringArm"));
-	TopDownSpringArm->SetupAttachment(RootComponent);
-	TopDownSpringArm->TargetArmLength = 1500.f;
-	TopDownSpringArm->SetRelativeRotation(FRotator(-90.f, 0.f, 0.f));
-	TopDownSpringArm->bUsePawnControlRotation = false;
-	TopDownSpringArm->bInheritPitch    = false;
-	TopDownSpringArm->bInheritYaw      = false;
-	TopDownSpringArm->bInheritRoll     = false;
-	TopDownSpringArm->bDoCollisionTest = false;
-	TopDownSpringArm->SetUsingAbsoluteRotation(true);
-
-	TopDownCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("TopDownCamera"));
-	TopDownCamera->SetupAttachment(TopDownSpringArm, USpringArmComponent::SocketName);
-	TopDownCamera->FieldOfView = 60.f;
-	TopDownCamera->SetActive(false);  // Inicia inactiva: la isométrica es la default
-
 	// Componente de combate
 	CombatComponent = CreateDefaultSubobject<UDPCombatComponent>(TEXT("CombatComponent"));
-}
-
-void ADPPlayerCharacter::SetTopDownCameraActive(bool bActive)
-{
-	if (TopDownCamera == nullptr || Camera == nullptr)
-	{
-		return;
-	}
-
-	TopDownCamera->SetActive(bActive);
-	Camera->SetActive(!bActive);
 }
 
 void ADPPlayerCharacter::BeginPlay()
