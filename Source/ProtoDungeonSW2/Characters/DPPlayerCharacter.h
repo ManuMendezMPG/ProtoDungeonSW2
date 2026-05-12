@@ -19,6 +19,10 @@ class PROTODUNGEONSW2_API ADPPlayerCharacter : public ADPCharacterBase
 public:
 	ADPPlayerCharacter();
 
+	// Activa la cámara cenital y desactiva la isométrica (o viceversa).
+	UFUNCTION(BlueprintCallable, Category = "Camera")
+	void SetTopDownCameraActive(bool bActive);
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
@@ -41,6 +45,13 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
 	TObjectPtr<UDPCombatComponent> CombatComponent;
+
+	// Cámara cenital (top-down) para modo Handheld
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
+	TObjectPtr<USpringArmComponent> TopDownSpringArm;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
+	TObjectPtr<UCameraComponent> TopDownCamera;
 
 private:
 	void Move(const FInputActionValue& Value);
