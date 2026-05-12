@@ -2,6 +2,10 @@
 #include "../Characters/DPPlayerCharacter.h"
 #include "../Characters/DPPuzzleBall.h"
 #include "../Input/DPPlatformModeSubsystem.h"
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
+#include "InputAction.h"
+#include "InputMappingContext.h"
 #include "Kismet/GameplayStatics.h"
 
 ADPPuzzlePlayerController::ADPPuzzlePlayerController()
@@ -16,6 +20,16 @@ void ADPPuzzlePlayerController::BeginPlay()
 	// Buscar los pawns en el mapa.
 	FindPawnsInLevel();
 
+	// Registrar el mapping context del controller (sobrevive al cambio de pawn)
+	if (InputMappingContext != nullptr)
+	{
+		if (UEnhancedInputLocalPlayerSubsystem* InputSubsystem =
+			ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
+		{
+			InputSubsystem->AddMappingContext(InputMappingContext, 0);
+		}
+	}
+
 	// Suscribirse al cambio de modo.
 	if (UDPPlatformModeSubsystem* PlatformSubsystem = GetGameInstance()->GetSubsystem<UDPPlatformModeSubsystem>())
 	{
@@ -23,6 +37,27 @@ void ADPPuzzlePlayerController::BeginPlay()
 
 		// Al iniciar, el modo es Docked, así que poseemos al player character.
 		OnPlatformModeChanged(PlatformSubsystem->CurrentMode);
+	}
+}
+
+void ADPPuzzlePlayerController::SetupInputComponent()
+{
+	Super::SetupInputComponent();
+
+	if (UEnhancedInputComponent* EIC = Cast<UEnhancedInputComponent>(InputComponent))
+	{
+		if (ToggleModeAction != nullptr)
+		{
+			EIC->BindAction(ToggleModeAction, ETriggerEvent::Started, this, &ADPPuzzlePlayerController::HandleToggleMode);
+		}
+	}
+}
+
+void ADPPuzzlePlayerController::HandleToggleMode()
+{
+	if (UDPPlatformModeSubsystem* PlatformSubsystem = GetGameInstance()->GetSubsystem<UDPPlatformModeSubsystem>())
+	{
+		PlatformSubsystem->TogglePlatformMode();
 	}
 }
 
