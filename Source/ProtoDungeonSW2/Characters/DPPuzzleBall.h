@@ -6,8 +6,6 @@
 
 class UStaticMeshComponent;
 class USphereComponent;
-class USpringArmComponent;
-class UCameraComponent;
 
 UCLASS()
 class PROTODUNGEONSW2_API ADPPuzzleBall : public APawn
@@ -45,13 +43,6 @@ protected:
 	// Collision (esférica) que actúa como root.
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<USphereComponent> CollisionSphere;
-
-	// SpringArm + Camera cenital para vista de puzzle.
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<USpringArmComponent> SpringArm;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<UCameraComponent> Camera;
 
 	// Velocidad actual de la bola (mundo).
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Physics")

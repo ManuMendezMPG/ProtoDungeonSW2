@@ -1,9 +1,7 @@
 #include "DPPuzzleBall.h"
-#include "Camera/CameraComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
-#include "GameFramework/SpringArmComponent.h"
 #include "UObject/ConstructorHelpers.h"
 
 ADPPuzzleBall::ADPPuzzleBall()
@@ -31,22 +29,8 @@ ADPPuzzleBall::ADPPuzzleBall()
 	}
 	BallMesh->SetRelativeScale3D(FVector(1.f));
 
-	// SpringArm cenital
-	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
-	SpringArm->SetupAttachment(RootComponent);
-	SpringArm->TargetArmLength = 1500.f;
-	SpringArm->SetRelativeRotation(FRotator(-90.f, 0.f, 0.f));
-	SpringArm->bUsePawnControlRotation = false;
-	SpringArm->bInheritPitch    = false;
-	SpringArm->bInheritYaw      = false;
-	SpringArm->bInheritRoll     = false;
-	SpringArm->bDoCollisionTest = false;
-	SpringArm->SetUsingAbsoluteRotation(true);
-
-	// Cámara cenital
-	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
-	Camera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
-	Camera->FieldOfView = 60.f;
+	// La cámara del puzzle vive en el mundo (Camera Actor con tag "PuzzleCamera");
+	// el ViewTarget lo gestiona ADPPuzzlePlayerController al cambiar de modo.
 }
 
 void ADPPuzzleBall::BeginPlay()

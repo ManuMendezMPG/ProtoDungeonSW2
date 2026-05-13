@@ -4,8 +4,10 @@
 #include "GameFramework/PlayerController.h"
 #include "DPPuzzlePlayerController.generated.h"
 
+class ACameraActor;
 class ADPPlayerCharacter;
 class ADPPuzzleBall;
+class UDPGyroInputSubsystem;
 class UInputAction;
 class UInputMappingContext;
 enum class EDPPlatformMode : uint8;
@@ -35,9 +37,18 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> ToggleModeAction;
 
+	// Referencia cacheada al subsystem de gyro para no buscarlo cada frame en PlayerTick.
+	UPROPERTY()
+	TObjectPtr<UDPGyroInputSubsystem> CachedGyroSubsystem;
+
+	// Camera Actor del laberinto (buscado por tag "PuzzleCamera" en BeginPlay).
+	UPROPERTY()
+	TObjectPtr<ACameraActor> PuzzleCameraActor;
+
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void SetupInputComponent() override;
+	virtual void PlayerTick(float DeltaTime) override;
 
 	// Llamado cuando el modo del subsistema cambia. Cambia la posesión al pawn correspondiente.
 	UFUNCTION()
@@ -45,6 +56,9 @@ protected:
 
 	// Helpers para encontrar los pawns en el mapa.
 	void FindPawnsInLevel();
+
+	// Busca un ACameraActor con tag "PuzzleCamera" en el nivel.
+	void FindPuzzleCameraInLevel();
 
 private:
 	void HandleToggleMode();

@@ -21,7 +21,7 @@ public:
 
 	// Cuánto recoger del delta de input cada vez que llega (sensibilidad).
 	UPROPERTY(BlueprintReadWrite, Category = "Gyro")
-	float TiltSensitivity = 0.01f;
+	float TiltSensitivity = 0.05f;
 
 	// Cuánto se "vuelve al centro" la inclinación pasivamente cuando no hay input (por segundo).
 	// 0 = no vuelve. 1 = vuelve al centro completo en 1 segundo.
