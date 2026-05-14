@@ -61,7 +61,15 @@ void ADPPuzzleBall::Tick(float DeltaTime)
 
 	// Movimiento con barrido de colisiones (sweep = true)
 	const FVector NewLocation = GetActorLocation() + CurrentVelocity * DeltaTime;
-	SetActorLocation(NewLocation, true);
+	FHitResult Hit;
+	SetActorLocation(NewLocation, true, &Hit);
+
+	// Si hubo bloqueo, proyectar la velocidad en el plano perpendicular a la normal
+	// para que la bola deslice a lo largo de la pared en lugar de quedar pegada.
+	if (Hit.bBlockingHit)
+	{
+		CurrentVelocity = FVector::VectorPlaneProject(CurrentVelocity, Hit.ImpactNormal);
+	}
 }
 
 void ADPPuzzleBall::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

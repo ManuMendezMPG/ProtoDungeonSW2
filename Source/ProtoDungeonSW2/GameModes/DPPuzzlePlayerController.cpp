@@ -83,8 +83,8 @@ void ADPPuzzlePlayerController::PlayerTick(float DeltaTime)
 	float MouseDeltaY = 0.f;
 	GetInputMouseDelta(MouseDeltaX, MouseDeltaY);
 
-	// Mouse X (derecha) → Y mundo (derecha en cenital). Mouse Y (abajo) → X mundo negativo (atrás en cenital).
-	const FVector2D Delta(-MouseDeltaY, MouseDeltaX);
+	// Iteración para Camera Actor con Yaw=-90 (candidato 2): mapeo directo Mouse X→X, Mouse Y→Y.
+	const FVector2D Delta(MouseDeltaX, -MouseDeltaY);
 	CachedGyroSubsystem->FeedTiltDelta(Delta);
 }
 
