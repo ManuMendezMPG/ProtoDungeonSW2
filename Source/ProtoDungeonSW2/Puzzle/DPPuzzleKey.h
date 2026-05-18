@@ -1,14 +1,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
+#include "DPInteractableBase.h"
 #include "DPPuzzleKey.generated.h"
 
 class UStaticMeshComponent;
 class USphereComponent;
 
 UCLASS()
-class PROTODUNGEONSW2_API ADPPuzzleKey : public AActor
+class PROTODUNGEONSW2_API ADPPuzzleKey : public ADPInteractableBase
 {
 	GENERATED_BODY()
 
@@ -22,6 +22,9 @@ public:
 	// Activa la llave (la hace visible y activa collision). Llamado al recibir el evento del subsystem.
 	UFUNCTION(BlueprintCallable, Category = "Puzzle")
 	void ActivateKey();
+
+	// Override: recoger la llave marca al player como teniéndola y se autodestruye.
+	virtual void Interact(AActor* InteractingActor) override;
 
 protected:
 	// Mesh visual (placeholder con cubo).

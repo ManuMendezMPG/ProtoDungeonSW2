@@ -16,6 +16,7 @@ ADPPuzzleKey::ADPPuzzleKey()
 	InteractionSphere->SetCollisionObjectType(ECC_WorldDynamic);
 	InteractionSphere->SetCollisionResponseToAllChannels(ECR_Ignore);
 	InteractionSphere->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+	InteractionSphere->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Overlap);
 	InteractionSphere->SetGenerateOverlapEvents(true);
 	RootComponent = InteractionSphere;
 
@@ -67,4 +68,20 @@ void ADPPuzzleKey::ActivateKey()
 	bIsActive = true;
 	SetActorHiddenInGame(false);
 	SetActorEnableCollision(true);
+}
+
+void ADPPuzzleKey::Interact(AActor* InteractingActor)
+{
+	// No se puede recoger una llave que aún no se ha activado
+	if (!bIsActive)
+	{
+		return;
+	}
+
+	if (UDPPuzzleStateSubsystem* PuzzleState = GetGameInstance()->GetSubsystem<UDPPuzzleStateSubsystem>())
+	{
+		PuzzleState->SetPlayerHasKey(true);
+	}
+
+	Destroy();
 }

@@ -1,5 +1,7 @@
 #include "DPPlayerCharacter.h"
 #include "../Combat/DPCombatComponent.h"
+#include "../Puzzle/DPInteractableBase.h"
+#include "Components/SphereComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -41,6 +43,17 @@ ADPPlayerCharacter::ADPPlayerCharacter()
 
 	// Componente de combate
 	CombatComponent = CreateDefaultSubobject<UDPCombatComponent>(TEXT("CombatComponent"));
+
+	// Esfera de detección de interactables. Object type WorldDynamic + respuesta Overlap a WorldDynamic
+	// (los interactables son WorldDynamic). La suscripción a los eventos va en BeginPlay.
+	InteractionSphere = CreateDefaultSubobject<USphereComponent>(TEXT("InteractionSphere"));
+	InteractionSphere->SetupAttachment(RootComponent);
+	InteractionSphere->SetSphereRadius(150.f);
+	InteractionSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	InteractionSphere->SetCollisionObjectType(ECC_WorldDynamic);
+	InteractionSphere->SetCollisionResponseToAllChannels(ECR_Ignore);
+	InteractionSphere->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Overlap);
+	InteractionSphere->SetGenerateOverlapEvents(true);
 }
 
 void ADPPlayerCharacter::BeginPlay()
@@ -56,6 +69,13 @@ void ADPPlayerCharacter::BeginPlay()
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
+
+	// Suscribirse a overlaps de la esfera de interacción
+	if (InteractionSphere)
+	{
+		InteractionSphere->OnComponentBeginOverlap.AddDynamic(this, &ADPPlayerCharacter::OnInteractionSphereBeginOverlap);
+		InteractionSphere->OnComponentEndOverlap.AddDynamic(this, &ADPPlayerCharacter::OnInteractionSphereEndOverlap);
+	}
 }
 
 void ADPPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -67,6 +87,11 @@ void ADPPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 		EIC->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ADPPlayerCharacter::Move);
 		EIC->BindAction(AttackAction, ETriggerEvent::Started, this, &ADPPlayerCharacter::OnAttack);
 		EIC->BindAction(SpecialAttackAction, ETriggerEvent::Started, this, &ADPPlayerCharacter::OnSpecialAttack);
+
+		if (InteractAction != nullptr)
+		{
+			EIC->BindAction(InteractAction, ETriggerEvent::Started, this, &ADPPlayerCharacter::OnInteractPressed);
+		}
 	}
 }
 
@@ -101,5 +126,37 @@ void ADPPlayerCharacter::OnSpecialAttack(const FInputActionValue& Value)
 	if (CombatComponent)
 	{
 		CombatComponent->TrySpecialAttack();
+	}
+}
+
+void ADPPlayerCharacter::OnInteractionSphereBeginOverlap(
+	UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
+	bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (ADPInteractableBase* Interactable = Cast<ADPInteractableBase>(OtherActor))
+	{
+		// Sobrescribe cualquier interactable previo: el último que entra gana
+		CurrentInteractable = Interactable;
+	}
+}
+
+void ADPPlayerCharacter::OnInteractionSphereEndOverlap(
+	UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	// Solo limpiamos si el que sale es el que teníamos en range
+	// (si entramos en A, luego B, y salimos de A, seguimos teniendo B disponible)
+	if (OtherActor == CurrentInteractable)
+	{
+		CurrentInteractable = nullptr;
+	}
+}
+
+void ADPPlayerCharacter::OnInteractPressed()
+{
+	if (CurrentInteractable != nullptr)
+	{
+		CurrentInteractable->Interact(this);
 	}
 }

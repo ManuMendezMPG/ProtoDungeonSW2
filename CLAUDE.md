@@ -141,3 +141,27 @@ de ese módulo, no requieren ../:
 
 Nota: Si en el futuro queremos paths "absolutos" desde raíz del módulo sin 
 ../ relativos, se puede añadir PublicIncludePaths en ProtoDungeonSW2.Build.cs.
+
+## Naming Conventions
+
+### Parameter shadowing of UE base class members
+
+Avoid parameter names in function signatures of classes inheriting from AActor or UObject that shadow members of those base classes. UE prohibits shadowing and the compiler will fail with an error like "Function parameter: 'X' cannot be defined ... as it is already defined in scope 'AActor' (shadowing is not allowed)".
+
+Members of AActor to avoid as parameter names:
+- Instigator (use InteractingActor, Caller, OtherActor)
+- Owner (use OwningActor, OwningPawn)
+- Tags (use ActorTags)
+- Role (use NetworkRole)
+
+Members of UObject to avoid as parameter names:
+- Name (use ActorName, ComponentName)
+- Outer (use OuterContext)
+
+When in doubt, prefix with a descriptor (Interacting, Owning, Source, Target).
+
+Example - bad:
+    virtual void Interact(AActor* Instigator);  // Compilation error
+
+Example - good:
+    virtual void Interact(AActor* InteractingActor);
