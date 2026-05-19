@@ -1,4 +1,5 @@
 #include "DPCharacterBase.h"
+#include "../GameModes/DPLevelTransitionSubsystem.h"
 #include "Animation/AnimInstance.h"
 #include "Animation/AnimMontage.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -90,6 +91,15 @@ void ADPCharacterBase::OnDeath()
 	if (UCharacterMovementComponent* Movement = GetCharacterMovement())
 	{
 		Movement->DisableMovement();
+	}
+
+	// Disparar transición de nivel si este character es el "trigger" del nivel (ej: enemigo final del L_Combat)
+	if (bTriggersLevelTransitionOnDeath && NextLevelName != NAME_None)
+	{
+		if (UDPLevelTransitionSubsystem* TransitionSubsystem = GetGameInstance()->GetSubsystem<UDPLevelTransitionSubsystem>())
+		{
+			TransitionSubsystem->TransitionToLevel(NextLevelName, 2.0f, 0.5f);
+		}
 	}
 }
 

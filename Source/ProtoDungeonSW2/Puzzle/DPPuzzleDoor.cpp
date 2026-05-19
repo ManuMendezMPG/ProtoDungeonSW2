@@ -1,5 +1,6 @@
 #include "DPPuzzleDoor.h"
 #include "DPPuzzleStateSubsystem.h"
+#include "../GameModes/DPLevelTransitionSubsystem.h"
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/Engine.h"
@@ -71,5 +72,14 @@ void ADPPuzzleDoor::OpenDoor()
 	if (GEngine)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Puerta abierta"));
+	}
+
+	// Disparar transición de nivel si esta puerta es la salida del nivel
+	if (bTriggersLevelTransitionOnOpen && NextLevelName != NAME_None)
+	{
+		if (UDPLevelTransitionSubsystem* TransitionSubsystem = GetGameInstance()->GetSubsystem<UDPLevelTransitionSubsystem>())
+		{
+			TransitionSubsystem->TransitionToLevel(NextLevelName, TransitionDelay, 0.5f);
+		}
 	}
 }

@@ -19,6 +19,19 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Puzzle")
 	bool bIsOpen = false;
 
+	// Si true, al abrirse esta puerta solicita al UDPLevelTransitionSubsystem cargar NextLevelName.
+	// Pensado para puertas de fin de nivel; el resto de puertas lo dejan en false.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Transition")
+	bool bTriggersLevelTransitionOnOpen = false;
+
+	// Mapa destino al abrirse cuando bTriggersLevelTransitionOnOpen = true.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Transition")
+	FName NextLevelName = NAME_None;
+
+	// Delay antes de iniciar el fade tras abrirse la puerta (segundos).
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Transition")
+	float TransitionDelay = 0.5f;
+
 	virtual void Interact(AActor* InteractingActor) override;
 
 protected:

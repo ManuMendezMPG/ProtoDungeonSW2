@@ -64,4 +64,13 @@ protected:
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Stats")
 	bool bIsDead = false;
+
+	// Si true, al morir este character solicita al UDPLevelTransitionSubsystem cargar NextLevelName.
+	// Pensado para enemigos clave del nivel; los players y enemigos genéricos lo dejan en false.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Transition")
+	bool bTriggersLevelTransitionOnDeath = false;
+
+	// Mapa destino al morir cuando bTriggersLevelTransitionOnDeath = true.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Transition")
+	FName NextLevelName = NAME_None;
 };
