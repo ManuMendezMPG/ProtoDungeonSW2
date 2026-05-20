@@ -73,7 +73,5 @@ void UDPLevelTransitionSubsystem::StartFadeAndLoad(float FadeDuration)
 void UDPLevelTransitionSubsystem::ExecuteOpenLevel()
 {
 	UGameplayStatics::OpenLevel(this, PendingLevelName);
-
-	// El GameInstanceSubsystem persiste entre niveles: reseteamos el flag explícitamente.
 	bTransitionInProgress = false;
 }
