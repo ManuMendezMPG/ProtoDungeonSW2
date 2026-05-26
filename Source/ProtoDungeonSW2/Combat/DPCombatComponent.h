@@ -45,15 +45,15 @@ public:
 
 	// Distancia desde el owner al centro de la esfera de impacto del ataque básico
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
-	float BasicAttackRange = 150.f;
+	float BasicAttackRange = 80.f;
 
 	// Distancia desde el owner al centro de la esfera de impacto del ataque especial
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
-	float SpecialAttackRange = 250.f;
+	float SpecialAttackRange = 95.f;
 
 	// Radio de la esfera de detección de impactos
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
-	float AttackRadius = 80.f;
+	float AttackRadius = 45.f;
 
 	// Si está activo, dibuja en pantalla la esfera de detección durante 1s
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat|Debug")
@@ -61,7 +61,7 @@ public:
 
 	// Cooldown del ataque básico (segundos)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (ClampMin = "0.0"))
-	float BasicAttackCooldown = 0.4f;
+	float BasicAttackCooldown = 0.5f;
 
 	// Cooldown del ataque especial (segundos). Bloquea TANTO básico como especial mientras está activo.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (ClampMin = "0.0"))
