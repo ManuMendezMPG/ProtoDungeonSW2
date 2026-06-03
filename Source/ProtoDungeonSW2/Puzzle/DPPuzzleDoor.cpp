@@ -1,27 +1,21 @@
 #include "DPPuzzleDoor.h"
 #include "DPPuzzleStateSubsystem.h"
 #include "../GameModes/DPLevelTransitionSubsystem.h"
+#include "Animation/AnimSequence.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "Components/SphereComponent.h"
-#include "Components/StaticMeshComponent.h"
-#include "Engine/Engine.h"
-#include "Engine/StaticMesh.h"
-#include "UObject/ConstructorHelpers.h"
+#include "TimerManager.h"
+#include <ProtoDungeonSW2/UI/DPMessageSubsystem.h>
 
 ADPPuzzleDoor::ADPPuzzleDoor()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
-	// Mesh sólido como root: bloquea al player
-	DoorMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("DoorMesh"));
+	// Skeletal mesh sólido como root: bloquea al player hasta que la puerta se abre.
+	// El mesh y la animación (gate / gateopen de Kenney) se asignan en el BP.
+	DoorMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("DoorMesh"));
 	RootComponent = DoorMesh;
 
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeMeshFinder(TEXT("/Engine/BasicShapes/Cube"));
-	if (CubeMeshFinder.Succeeded())
-	{
-		DoorMesh->SetStaticMesh(CubeMeshFinder.Object);
-	}
-	// Puerta delgada (30cm), ancha (200cm), alta (300cm)
-	DoorMesh->SetRelativeScale3D(FVector(0.3f, 2.0f, 3.0f));
 	DoorMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	DoorMesh->SetCollisionObjectType(ECC_WorldStatic);
 	DoorMesh->SetCollisionResponseToAllChannels(ECR_Block);
@@ -55,9 +49,12 @@ void ADPPuzzleDoor::Interact(AActor* InteractingActor)
 		}
 		else
 		{
-			if (GEngine)
+			if (UGameInstance* GI = GetGameInstance())
 			{
-				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Necesitas la llave"));
+				if (UDPMessageSubsystem* MessageSubsystem = GI->GetSubsystem<UDPMessageSubsystem>())
+				{
+					MessageSubsystem->RequestMessage(NoKeyMessage, NoKeyMessageDuration);
+				}
 			}
 		}
 	}
@@ -65,16 +62,38 @@ void ADPPuzzleDoor::Interact(AActor* InteractingActor)
 
 void ADPPuzzleDoor::OpenDoor()
 {
+	// Marcar abierta primero para evitar re-interacción durante la animación.
 	bIsOpen = true;
-	DoorMesh->SetVisibility(false);
-	DoorMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-	if (GEngine)
+	// PlayAnimation con Loop=false mantiene el último frame: la puerta se queda abierta en pantalla.
+	// Programamos un timer porque PlayAnimation no dispara OnMontageEnded.
+	if (OpenAnimation && DoorMesh)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Puerta abierta"));
+		DoorMesh->PlayAnimation(OpenAnimation, false);
+		const float Duration = OpenAnimation->GetPlayLength();
+		GetWorldTimerManager().SetTimer(
+			OpenAnimTimerHandle, this,
+			&ADPPuzzleDoor::OnOpenAnimationEnded,
+			Duration, false);
+	}
+	else
+	{
+		// Fallback: si no hay animación asignada, ejecuta el final
+		// directamente para que la mecánica no se quede colgada
+		OnOpenAnimationEnded();
+	}
+}
+
+void ADPPuzzleDoor::OnOpenAnimationEnded()
+{
+	// Desactivar colisión sólo ahora: el player no podría atravesar la puerta mientras
+	// se está abriendo, pero sí puede hacerlo una vez está totalmente abierta.
+	if (DoorMesh)
+	{
+		DoorMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 
-	// Disparar transición de nivel si esta puerta es la salida del nivel
+	// Disparar transición de nivel si esta puerta es la salida del nivel.
 	if (bTriggersLevelTransitionOnOpen && NextLevelName != NAME_None)
 	{
 		if (UDPLevelTransitionSubsystem* TransitionSubsystem = GetGameInstance()->GetSubsystem<UDPLevelTransitionSubsystem>())
