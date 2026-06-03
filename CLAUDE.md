@@ -165,3 +165,113 @@ Example - bad:
 
 Example - good:
     virtual void Interact(AActor* InteractingActor);
+
+## Patrón: actor con animación one-shot que cambia de estado
+
+Cuando un actor del puzzle (o cualquier otro sistema) necesita 
+reproducir una animación que lo lleva de un estado A a un estado B 
+persistente — por ejemplo cofre cerrado → abierto, puerta cerrada → 
+abierta —, seguir este patrón.
+
+Referencias en el código: `ADPPuzzleChest`, `ADPPuzzleDoor`.
+
+### Estructura
+
+1. **RootComponent**: `USkeletalMeshComponent`, no `UStaticMeshComponent`. 
+   El skeletal es necesario para reproducir animaciones aunque el actor 
+   no necesite AnimBP.
+
+2. **Animación**: `UAnimSequence*` asignado vía `UPROPERTY EditAnywhere`. 
+   No usar `UAnimMontage` para este caso: los montages devuelven el slot 
+   a la bind pose cuando terminan, lo cual revierte visualmente el 
+   estado.
+
+3. **AnimBP del SkeletalMesh**: no se necesita. `PlayAnimation()` pone 
+   el `SkeletalMeshComponent` en modo `AnimationSingleNode` y bypasea 
+   el AnimGraph.
+
+4. **Bool de estado**: `bool bIsOpen` / `bool bHasBeenOpened`, 
+   `UPROPERTY BlueprintReadOnly`. Es la fuente de verdad para "ya se 
+   activó", no la collision ni la visibilidad.
+
+5. **FTimerHandle**: privado, para detectar el fin de la animación. 
+   `PlayAnimation` no dispara `OnMontageEnded` (no usa montages); 
+   usamos un timer manual con la duración real de la animación.
+
+### Flujo de Interact()
+
+```cpp
+void AMyActor::Interact(AActor* InteractingActor)
+{
+    if (bIsOpen) return;       // Idempotencia: no re-activar
+    bIsOpen = true;            // Marcar PRIMERO para bloquear re-entradas
+
+    if (OpenAnimation && Mesh)
+    {
+        Mesh->PlayAnimation(OpenAnimation, false);
+        const float Duration = OpenAnimation->GetPlayLength();
+        GetWorldTimerManager().SetTimer(
+            AnimTimerHandle, this,
+            &AMyActor::OnAnimationEnded,
+            Duration, false);
+    }
+    else
+    {
+        // Fallback: si falta la animación o el mesh, no queremos que 
+        // la mecánica se quede colgada. Llamamos al handler de fin de 
+        // animación directamente.
+        OnAnimationEnded();
+    }
+}
+```
+
+### Handler del fin de animación
+
+Todo el efecto **persistente** (cambio de collision, transición de 
+nivel, set de flag en subsystem, broadcast de mensaje, etc.) va aquí, 
+**nunca dentro de Interact() directamente**. Así el feedback visual 
+y la mecánica están sincronizados.
+
+```cpp
+void AMyActor::OnAnimationEnded()
+{
+    // Efectos persistentes: collision toggle, transición, subsystem, 
+    // mensaje HUD, etc.
+}
+```
+
+### Reglas de collision
+
+- **Constructor**: configurar el mesh como Block contra Pawn 
+  (`WorldStatic` u `WorldDynamic` según corresponda) para que el 
+  player no atraviese el actor mientras está en estado A.
+- **No llamar `SetActorEnableCollision(false)` en Interact()**: el 
+  bool de estado ya previene re-interacción. Desactivar toda la 
+  collision rompe el bloqueo físico.
+- **Si el estado B requiere que el player atraviese el actor** 
+  (caso de la puerta): hacer `Mesh->SetCollisionEnabled(NoCollision)` 
+  en `OnAnimationEnded()`, no antes.
+- **Si el actor debe estar oculto antes de un evento de revelación** 
+  (caso del cofre con `OnBallReachedGoal`): en `BeginPlay()` hacer 
+  `SetActorHiddenInGame(true)` + `SetActorEnableCollision(false)`. En 
+  el handler del delegate de revelación, volver a activar ambos.
+
+### Conexión con UDPMessageSubsystem
+
+Si el actor debe mostrar un mensaje al jugador (al abrirse, al fallar 
+una condición, etc.), pedirlo al subsystem desde Interact() o desde 
+OnAnimationEnded() según el caso:
+
+```cpp
+if (UGameInstance* GI = GetGameInstance())
+{
+    if (UDPMessageSubsystem* MessageSubsystem = 
+        GI->GetSubsystem<UDPMessageSubsystem>())
+    {
+        MessageSubsystem->RequestMessage(Message, Duration);
+    }
+}
+```
+
+No usar `GEngine->AddOnScreenDebugMessage` en lógica de gameplay — 
+ese canal es solo para debug temporal.
