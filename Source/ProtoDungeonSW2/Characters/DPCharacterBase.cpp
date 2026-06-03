@@ -2,6 +2,7 @@
 #include "../GameModes/DPLevelTransitionSubsystem.h"
 #include "Animation/AnimInstance.h"
 #include "Animation/AnimMontage.h"
+#include "Animation/AnimSequence.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/Engine.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -78,6 +79,14 @@ float ADPCharacterBase::GetHealthPercent() const
 
 void ADPCharacterBase::OnDeath()
 {
+	// Reproducir animación de muerte si está asignada. PlayAnimation con
+	// Loop=false mantiene la pose en el último frame; no se vuelve al
+	// AnimBP (no hace falta — el personaje está muerto)
+	if (DeathAnimation && GetMesh())
+	{
+		GetMesh()->PlayAnimation(DeathAnimation, false);
+	}
+
 	if (GEngine)
 	{
 		const FString Msg = FString::Printf(TEXT("[%s] died"), *GetName());

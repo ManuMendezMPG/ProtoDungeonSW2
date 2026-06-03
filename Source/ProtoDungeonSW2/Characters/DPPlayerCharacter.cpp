@@ -1,15 +1,21 @@
 #include "DPPlayerCharacter.h"
 #include "../Combat/DPCombatComponent.h"
 #include "../Puzzle/DPInteractableBase.h"
-#include "Components/SphereComponent.h"
-#include "GameFramework/SpringArmComponent.h"
+#include "Animation/AnimSequence.h"
+#include "Blueprint/UserWidget.h"
 #include "Camera/CameraComponent.h"
-#include "GameFramework/CharacterMovementComponent.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Components/SphereComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/PlayerController.h"
+#include "GameFramework/SpringArmComponent.h"
 #include "InputAction.h"
-#include "InputMappingContext.h"
 #include "InputActionValue.h"
+#include "InputMappingContext.h"
+#include "Kismet/GameplayStatics.h"
+#include "TimerManager.h"
 
 ADPPlayerCharacter::ADPPlayerCharacter()
 {
@@ -68,6 +74,18 @@ void ADPPlayerCharacter::BeginPlay()
 		{
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
+	}
+
+	// Asegurar estado de input correcto al spawnear: tras un Game Over Retry,
+	// el viewport del editor puede mantener el InputMode anterior (UIOnly).
+	// Forzamos GameOnly y ocultamos el cursor para que el gameplay reciba
+	// input correctamente desde el primer frame.
+	if (APlayerController* PC = Cast<APlayerController>(GetController()))
+	{
+		FInputModeGameOnly InputMode;
+		PC->SetInputMode(InputMode);
+		PC->SetShowMouseCursor(false);
+		EnableInput(PC);
 	}
 
 	// Suscribirse a overlaps de la esfera de interacción
@@ -159,4 +177,70 @@ void ADPPlayerCharacter::OnInteractPressed()
 	{
 		CurrentInteractable->Interact(this);
 	}
+}
+
+void ADPPlayerCharacter::OnDeath()
+{
+	// Comportamiento heredado: reproduce DeathAnimation, desactiva
+	// collision, detiene movement, opcionalmente transiciona de nivel
+	Super::OnDeath();
+
+	// Bloquear input del player para que no pueda moverse / atacar
+	// mientras se reproduce la animación de muerte
+	APlayerController* PC = Cast<APlayerController>(GetController());
+	if (PC)
+	{
+		DisableInput(PC);
+	}
+
+	// Programar la aparición del Game Over para cuando termine la
+	// animación de muerte. Si no hay animación, fallback a 2 segundos
+	// para que el jugador procese el momento antes de ver el widget
+	float Delay = 2.0f;
+	if (DeathAnimation)
+	{
+		Delay = DeathAnimation->GetPlayLength();
+	}
+
+	GetWorldTimerManager().SetTimer(
+		GameOverTimerHandle, this,
+		&ADPPlayerCharacter::ShowGameOverScreen,
+		Delay, false);
+}
+
+void ADPPlayerCharacter::ShowGameOverScreen()
+{
+	if (!GameOverWidgetClass)
+	{
+		UE_LOG(LogTemp, Warning,
+			TEXT("ADPPlayerCharacter: GameOverWidgetClass no asignado. "
+				 "Asignar WBP_GameOver en el Blueprint."));
+		return;
+	}
+
+	APlayerController* PC = Cast<APlayerController>(GetController());
+	if (!PC)
+	{
+		return;
+	}
+
+	// Crear y mostrar el widget
+	UUserWidget* GameOverWidget = CreateWidget<UUserWidget>(
+		PC, GameOverWidgetClass);
+	if (GameOverWidget)
+	{
+		GameOverWidget->AddToViewport();
+	}
+
+	// Configurar input para UI: ratón visible, eventos de UI activos,
+	// sin captura de input de gameplay
+	PC->SetShowMouseCursor(true);
+	FInputModeUIOnly InputMode;
+	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+	PC->SetInputMode(InputMode);
+
+	// Pausar el juego para congelar enemigos y mantener la pose de
+	// muerte del player en su último frame. El UI tick sigue
+	// funcionando para el botón Retry
+	UGameplayStatics::SetGamePaused(this, true);
 }

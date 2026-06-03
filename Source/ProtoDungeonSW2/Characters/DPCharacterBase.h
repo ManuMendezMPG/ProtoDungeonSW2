@@ -5,6 +5,7 @@
 #include "DPCharacterBase.generated.h"
 
 class UAnimMontage;
+class UAnimSequence;
 class USoundBase;
 
 // Delegate disparado cuando cambia la vida; los listeners (UI, BPs) reciben los valores actualizados
@@ -38,6 +39,11 @@ public:
 	// Reacción al recibir daño desde detrás
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat|Animation")
 	TObjectPtr<UAnimMontage> HitReactBackMontage;
+
+	// Animación de muerte (one-shot). Si está asignada, se reproduce vía PlayAnimation
+	// y mantiene el último frame. Si es nullptr, el actor muere sin animación específica.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat|Animation")
+	TObjectPtr<UAnimSequence> DeathAnimation;
 
 	// Sonido reproducido en la posición del actor al recibir daño no letal (gruñido).
 	// Si es nullptr, no suena nada. La muerte tiene su propio feedback.

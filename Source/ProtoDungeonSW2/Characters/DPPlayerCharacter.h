@@ -11,6 +11,7 @@ class UInputMappingContext;
 class UInputAction;
 class UDPCombatComponent;
 class ADPInteractableBase;
+class UUserWidget;
 struct FInputActionValue;
 
 UCLASS()
@@ -24,6 +25,14 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
+
+	// Override de la muerte: añade al flujo base el bloqueo de input y el Game Over UI
+	// tras la duración de DeathAnimation (o un fallback si no hay animación asignada)
+	virtual void OnDeath() override;
+
+	// Clase del widget que aparece al morir el player. Se asigna WBP_GameOver desde el Blueprint child.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Game Over")
+	TSubclassOf<UUserWidget> GameOverWidgetClass;
 
 	// Contexto de input por defecto (Combat)
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
@@ -80,4 +89,12 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UCameraComponent> Camera;
+
+	// Timer para retrasar la aparición del Game Over hasta que termine DeathAnimation.
+	FTimerHandle GameOverTimerHandle;
+
+	// Muestra el widget de Game Over y bloquea input. Llamado tras la
+	// duración de DeathAnimation para que el feedback visual de muerte
+	// y la UI estén sincronizados
+	void ShowGameOverScreen();
 };
