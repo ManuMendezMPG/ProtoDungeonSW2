@@ -275,3 +275,39 @@ if (UGameInstance* GI = GetGameInstance())
 
 No usar `GEngine->AddOnScreenDebugMessage` en lógica de gameplay — 
 ese canal es solo para debug temporal.
+
+### Variante para Character con AnimBP
+
+Cuando el actor es un ACharacter con AnimBP completo (state machine 
+locomotion + montages) pero también tiene una animación one-shot que 
+debe persistir (muerte del player, muerte de enemigos), aplicar el 
+mismo patrón:
+
+- La animación va como UAnimSequence (no UAnimMontage). PlayAnimation 
+  bypasea el AnimBP y mantiene el último frame.
+- Se asume que tras esta animación el actor no necesita volver al 
+  AnimBP. Si tuviera que reanimarse, habría que restaurar el modo 
+  con SetAnimationMode(EAnimationMode::AnimationBlueprint) + reasignar 
+  el AnimClass.
+
+Referencia: ADPCharacterBase::OnDeath() reproduce DeathAnimation 
+mediante GetMesh()->PlayAnimation(DeathAnimation, false).
+
+### Combinación con UI tras la animación
+
+Cuando la animación culmina con UI (Game Over, victoria, mensaje 
+modal):
+
+1. Programar el widget con FTimerHandle con Delay = 
+   AnimSequence->GetPlayLength() para sincronizar.
+2. Al mostrar el widget: SetInputModeUIOnly + SetShowMouseCursor(true) 
+   + SetGamePaused(true).
+3. Al cerrar el widget (botón Retry, Continue, etc.): SetGamePaused(false) 
+   + RemoveFromParent + acción siguiente.
+4. En BeginPlay del Character spawneado tras un reload defensivamente: 
+   SetInputModeGameOnly + SetShowMouseCursor(false) + EnableInput(PC). 
+   El viewport del editor (PIE) puede mantener el InputMode anterior y 
+   bloquear input al nuevo player.
+
+Referencia: ADPPlayerCharacter::OnDeath() / ShowGameOverScreen() / 
+BeginPlay().
