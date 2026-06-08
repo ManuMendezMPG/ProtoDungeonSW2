@@ -1,8 +1,10 @@
 #include "DPCharacterBase.h"
 #include "../GameModes/DPLevelTransitionSubsystem.h"
+#include "AIController.h"
 #include "Animation/AnimInstance.h"
 #include "Animation/AnimMontage.h"
 #include "Animation/AnimSequence.h"
+#include "BrainComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/Engine.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -87,6 +89,18 @@ void ADPCharacterBase::OnDeath()
 		GetMesh()->PlayAnimation(DeathAnimation, false);
 	}
 
+	// Detener cualquier montage activo (ej. ataque a medio camino).
+	// Esto evita que notifies pendientes como DamageMoment disparen daño
+	// post-muerte. Usamos un BlendOut corto pero no instantáneo para que
+	// la transición a la pose de DeathAnimation no se vea brusca
+	if (USkeletalMeshComponent* MeshComp = GetMesh())
+	{
+		if (UAnimInstance* AnimInstance = MeshComp->GetAnimInstance())
+		{
+			AnimInstance->Montage_Stop(0.1f);
+		}
+	}
+
 	if (GEngine)
 	{
 		const FString Msg = FString::Printf(TEXT("[%s] died"), *GetName());
@@ -100,6 +114,18 @@ void ADPCharacterBase::OnDeath()
 	if (UCharacterMovementComponent* Movement = GetCharacterMovement())
 	{
 		Movement->DisableMovement();
+	}
+
+	// Si el actor es controlado por un AIController, detener su Behavior
+	// Tree y desposeer el pawn. Sin esto el AI sigue evaluando el BT
+	// durante el delay de transición y puede ejecutar acciones
+	// (perseguir, atacar) sobre un cadáver
+	if (AAIController* AIController = Cast<AAIController>(GetController()))
+	{
+		if (UBrainComponent* Brain = AIController->GetBrainComponent())
+		{
+			Brain->StopLogic(TEXT("Character died"));
+		}
 	}
 
 	// Disparar transición de nivel si este character es el "trigger" del nivel (ej: enemigo final del L_Combat)
