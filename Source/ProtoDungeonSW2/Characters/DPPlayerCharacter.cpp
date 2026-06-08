@@ -1,5 +1,6 @@
 #include "DPPlayerCharacter.h"
 #include "../Combat/DPCombatComponent.h"
+#include "../Input/DPPlatformModeSubsystem.h"
 #include "../Puzzle/DPInteractableBase.h"
 #include "Animation/AnimSequence.h"
 #include "Blueprint/UserWidget.h"
@@ -109,6 +110,11 @@ void ADPPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 		if (InteractAction != nullptr)
 		{
 			EIC->BindAction(InteractAction, ETriggerEvent::Started, this, &ADPPlayerCharacter::OnInteractPressed);
+		}
+
+		if (ToggleModeAction != nullptr)
+		{
+			EIC->BindAction(ToggleModeAction, ETriggerEvent::Started, this, &ADPPlayerCharacter::OnToggleModePressed);
 		}
 	}
 }
@@ -243,4 +249,16 @@ void ADPPlayerCharacter::ShowGameOverScreen()
 	// muerte del player en su último frame. El UI tick sigue
 	// funcionando para el botón Retry
 	UGameplayStatics::SetGamePaused(this, true);
+}
+
+void ADPPlayerCharacter::OnToggleModePressed()
+{
+	if (UGameInstance* GI = GetGameInstance())
+	{
+		if (UDPPlatformModeSubsystem* PlatformSubsystem =
+			GI->GetSubsystem<UDPPlatformModeSubsystem>())
+		{
+			PlatformSubsystem->TogglePlatformMode();
+		}
+	}
 }

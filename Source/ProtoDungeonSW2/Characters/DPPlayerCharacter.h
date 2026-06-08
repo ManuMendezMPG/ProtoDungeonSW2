@@ -54,6 +54,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> InteractAction;
 
+	// Acción para alternar Docked/Handheld (tecla M en PC). El IA está en IMC_Default.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	TObjectPtr<UInputAction> ToggleModeAction;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
 	TObjectPtr<UDPCombatComponent> CombatComponent;
 
@@ -83,6 +87,7 @@ private:
 	void OnAttack(const FInputActionValue& Value);
 	void OnSpecialAttack(const FInputActionValue& Value);
 	void OnInteractPressed();
+	void OnToggleModePressed();
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<USpringArmComponent> SpringArm;
