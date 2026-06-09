@@ -7,7 +7,7 @@ void UDPGyroInputSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	CurrentTilt = FVector2D::ZeroVector;
 	bGyroActive = false;
 
-	// Registrar tick global: devuelve true para seguir ticking cada frame
+	// Register a global tick: return true to keep ticking every frame
 	TickerHandle = FTSTicker::GetCoreTicker().AddTicker(
 		FTickerDelegate::CreateLambda([this](float DeltaTime) -> bool
 		{
@@ -33,7 +33,7 @@ void UDPGyroInputSubsystem::FeedTiltDelta(FVector2D Delta)
 
 	CurrentTilt += Delta * TiltSensitivity;
 
-	// Clamp por eje al rango [-MaxTilt, MaxTilt]
+	// Clamp per axis to the range [-MaxTilt, MaxTilt]
 	CurrentTilt.X = FMath::Clamp(CurrentTilt.X, -MaxTilt, MaxTilt);
 	CurrentTilt.Y = FMath::Clamp(CurrentTilt.Y, -MaxTilt, MaxTilt);
 
@@ -50,7 +50,7 @@ void UDPGyroInputSubsystem::SetGyroActive(bool bActive)
 {
 	bGyroActive = bActive;
 
-	// Al desactivar, dejar el tilt centrado para no arrastrar estado al volver
+	// On disable, leave the tilt centered so state doesn't carry over when we come back
 	if (!bGyroActive)
 	{
 		ResetTilt();
@@ -64,20 +64,20 @@ void UDPGyroInputSubsystem::TickCentering(float DeltaTime)
 		return;
 	}
 
-	// Ya centrado: nada que hacer (evita broadcast espurio cada frame)
+	// Already centered: nothing to do (avoids spurious broadcasts every frame)
 	if (CurrentTilt.IsNearlyZero())
 	{
 		return;
 	}
 
-	// Vector hacia el centro, escalado por CenteringSpeed y DeltaTime
+	// Vector toward the center, scaled by CenteringSpeed and DeltaTime
 	const FVector2D Direction  = -CurrentTilt.GetSafeNormal();
 	const float CurrentMag     = CurrentTilt.Size();
 	const float CenteringMag   = CenteringSpeed * DeltaTime;
 
 	if (CenteringMag >= CurrentMag)
 	{
-		// El paso de centering nos pasaría del centro: clavamos en zero
+		// The centering step would overshoot zero: snap to zero
 		CurrentTilt = FVector2D::ZeroVector;
 	}
 	else

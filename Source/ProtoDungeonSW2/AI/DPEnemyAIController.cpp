@@ -8,11 +8,11 @@ void ADPEnemyAIController::OnPossess(APawn* InPawn)
 
 	if (!BehaviorTreeAsset)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("ADPEnemyAIController::OnPossess: BehaviorTreeAsset no asignado en %s"), *GetName());
+		UE_LOG(LogTemp, Warning, TEXT("ADPEnemyAIController::OnPossess: BehaviorTreeAsset not assigned on %s"), *GetName());
 		return;
 	}
 
-	// Inicializa el blackboard si el BT lo declara, antes de arrancar el árbol
+	// Initialize the blackboard if the BT declares one, before starting the tree
 	if (BehaviorTreeAsset->BlackboardAsset)
 	{
 		UBlackboardComponent* BlackboardComp = nullptr;
@@ -24,6 +24,6 @@ void ADPEnemyAIController::OnPossess(APawn* InPawn)
 
 void ADPEnemyAIController::OnUnPossess()
 {
-	// El BT se detiene automáticamente al despossess; nada extra por ahora
+	// The BT stops automatically on unpossess; nothing extra for now
 	Super::OnUnPossess();
 }

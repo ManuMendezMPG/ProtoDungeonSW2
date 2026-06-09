@@ -11,8 +11,8 @@ ADPPuzzleDoor::ADPPuzzleDoor()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
-	// Skeletal mesh sólido como root: bloquea al player hasta que la puerta se abre.
-	// El mesh y la animación (gate / gateopen de Kenney) se asignan en el BP.
+	// Solid skeletal mesh as root: blocks the player until the door opens.
+	// The mesh and animation (Kenney's gate / gateopen) are assigned in the BP.
 	DoorMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("DoorMesh"));
 	RootComponent = DoorMesh;
 
@@ -20,7 +20,7 @@ ADPPuzzleDoor::ADPPuzzleDoor()
 	DoorMesh->SetCollisionObjectType(ECC_WorldStatic);
 	DoorMesh->SetCollisionResponseToAllChannels(ECR_Block);
 
-	// Esfera de interacción: solo overlap, no bloquea
+	// Interaction sphere: overlap only, doesn't block
 	InteractionSphere = CreateDefaultSubobject<USphereComponent>(TEXT("InteractionSphere"));
 	InteractionSphere->SetupAttachment(RootComponent);
 	InteractionSphere->InitSphereRadius(150.f);
@@ -28,8 +28,8 @@ ADPPuzzleDoor::ADPPuzzleDoor()
 	InteractionSphere->SetCollisionObjectType(ECC_WorldDynamic);
 	InteractionSphere->SetCollisionResponseToAllChannels(ECR_Ignore);
 	InteractionSphere->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
-	// CRÍTICO: WorldDynamic también debe responder para que la InteractionSphere
-	// del player (WorldDynamic) detecte esta esfera. Sin esto el overlap no dispara.
+	// CRITICAL: WorldDynamic must respond too so the player's InteractionSphere
+	// (WorldDynamic) detects this sphere. Without this the overlap doesn't fire.
 	InteractionSphere->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Overlap);
 	InteractionSphere->SetGenerateOverlapEvents(true);
 }
@@ -62,11 +62,11 @@ void ADPPuzzleDoor::Interact(AActor* InteractingActor)
 
 void ADPPuzzleDoor::OpenDoor()
 {
-	// Marcar abierta primero para evitar re-interacción durante la animación.
+	// Mark as open first to prevent re-interaction during the animation.
 	bIsOpen = true;
 
-	// PlayAnimation con Loop=false mantiene el último frame: la puerta se queda abierta en pantalla.
-	// Programamos un timer porque PlayAnimation no dispara OnMontageEnded.
+	// PlayAnimation with Loop=false holds the last frame: the door stays open on screen.
+	// We schedule a timer because PlayAnimation does not fire OnMontageEnded.
 	if (OpenAnimation && DoorMesh)
 	{
 		DoorMesh->PlayAnimation(OpenAnimation, false);
@@ -78,22 +78,22 @@ void ADPPuzzleDoor::OpenDoor()
 	}
 	else
 	{
-		// Fallback: si no hay animación asignada, ejecuta el final
-		// directamente para que la mecánica no se quede colgada
+		// Fallback: if no animation is assigned, run the final logic
+		// directly so the mechanic doesn't get stuck
 		OnOpenAnimationEnded();
 	}
 }
 
 void ADPPuzzleDoor::OnOpenAnimationEnded()
 {
-	// Desactivar colisión sólo ahora: el player no podría atravesar la puerta mientras
-	// se está abriendo, pero sí puede hacerlo una vez está totalmente abierta.
+	// Disable collision only now: the player couldn't cross the door while
+	// it's opening, but they can once it's fully open.
 	if (DoorMesh)
 	{
 		DoorMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 
-	// Disparar transición de nivel si esta puerta es la salida del nivel.
+	// Trigger the level transition if this door is the level exit.
 	if (bTriggersLevelTransitionOnOpen && NextLevelName != NAME_None)
 	{
 		if (UDPLevelTransitionSubsystem* TransitionSubsystem = GetGameInstance()->GetSubsystem<UDPLevelTransitionSubsystem>())

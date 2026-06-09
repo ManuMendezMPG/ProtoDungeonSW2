@@ -10,7 +10,7 @@ class PROTODUNGEONSW2_API ADPEnemyAIController : public AAIController
 	GENERATED_BODY()
 
 public:
-	// BT que ejecutará este controller al poseer al pawn. Se asigna desde el BP del controller.
+	// BT this controller will run when it possesses the pawn. Assigned from the controller's BP.
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
 	TObjectPtr<class UBehaviorTree> BehaviorTreeAsset;
 

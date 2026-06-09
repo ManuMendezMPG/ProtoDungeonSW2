@@ -7,5 +7,5 @@ ADPInteractableBase::ADPInteractableBase()
 
 void ADPInteractableBase::Interact(AActor* InteractingActor)
 {
-	// Implementación base vacía. Las clases derivadas hacen override.
+	// Empty base implementation. Derived classes override.
 }

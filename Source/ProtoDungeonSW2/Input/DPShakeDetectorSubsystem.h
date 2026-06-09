@@ -12,7 +12,7 @@ class PROTODUNGEONSW2_API UDPShakeDetectorSubsystem : public UGameInstanceSubsys
 	GENERATED_BODY()
 
 public:
-	// Tunables expuestos al editor vía console o DefaultEngine.ini (no UPROPERTY EditAnywhere porque subsystem no es asset).
+	// Tunables exposed to the editor via console or DefaultEngine.ini (not UPROPERTY EditAnywhere because a subsystem is not an asset).
 	UPROPERTY(BlueprintReadWrite, Category = "Shake")
 	float ShakeWindowSeconds = 0.2f;
 
@@ -22,11 +22,11 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "Shake")
 	float ShakeCooldown = 0.5f;
 
-	// Delegate que cualquier listener puede bindear desde BP o C++.
+	// Delegate any listener can bind from BP or C++.
 	UPROPERTY(BlueprintAssignable, Category = "Shake")
 	FOnShakeDetectedSignature OnShakeDetected;
 
-	// Punto de entrada para inputs. Llamado desde BP_PlayerCharacter (PC) o futuro plugin de JoyCon (Switch).
+	// Input entry point. Called from BP_PlayerCharacter (PC) or a future JoyCon plugin (Switch).
 	UFUNCTION(BlueprintCallable, Category = "Shake")
 	void FeedInputDelta(FVector Delta);
 
@@ -35,7 +35,7 @@ public:
 	virtual void Deinitialize() override;
 
 private:
-	// Historial de samples: (timestamp, magnitude).
+	// Sample history: (timestamp, magnitude).
 	struct FInputSample
 	{
 		float Timestamp;
@@ -44,7 +44,7 @@ private:
 
 	TArray<FInputSample> InputHistory;
 
-	float LastShakeTime;  // Para cooldown.
+	float LastShakeTime;  // For cooldown.
 
 	void CleanOldSamples(float CurrentTime);
 	float GetAccumulatedMagnitude() const;

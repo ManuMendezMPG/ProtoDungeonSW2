@@ -15,7 +15,7 @@ public:
 	ADPEnemyBase();
 
 protected:
-	// Override del hook de muerte: programa destrucción diferida
+	// Override of the death hook: schedules deferred destruction
 	virtual void OnDeath() override;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")

@@ -13,19 +13,19 @@ class PROTODUNGEONSW2_API UDPBTService_UpdateTarget : public UBTService_Blackboa
 public:
 	UDPBTService_UpdateTarget();
 
-	// Radio máximo al que el enemigo "ve" al jugador
+	// Maximum radius at which the enemy "sees" the player
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI", meta = (ClampMin = "0.0"))
 	float DetectionRadius = 1000.f;
 
-	// Distancia a la que se considera al jugador en rango de ataque
+	// Distance at which the player is considered in attack range
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI", meta = (ClampMin = "0.0"))
 	float AttackRange = 130.f;
 
-	// Key del BB donde escribir la referencia al jugador detectado (Object: AActor)
+	// BB key where we write the reference to the detected player (Object: AActor)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
 	FBlackboardKeySelector TargetActorKey;
 
-	// Key del BB donde escribir si el jugador está en rango de ataque (Bool)
+	// BB key where we write whether the player is in attack range (Bool)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
 	FBlackboardKeySelector IsInAttackRangeKey;
 

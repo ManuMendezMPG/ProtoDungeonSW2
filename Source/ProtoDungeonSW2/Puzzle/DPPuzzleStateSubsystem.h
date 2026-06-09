@@ -21,11 +21,11 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Puzzle")
 	FOnBallReachedGoalSignature OnBallReachedGoal;
 
-	// Llamado por el HoleTrigger cuando la bola cae.
+	// Called by HoleTrigger when the ball falls in.
 	UFUNCTION(BlueprintCallable, Category = "Puzzle")
 	void NotifyBallReachedGoal();
 
-	// Llamado por el player al recoger la llave.
+	// Called by the player when picking up the key.
 	UFUNCTION(BlueprintCallable, Category = "Puzzle")
 	void SetPlayerHasKey(bool bHasKey);
 

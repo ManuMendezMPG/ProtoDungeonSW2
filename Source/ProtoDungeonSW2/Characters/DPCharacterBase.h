@@ -8,7 +8,7 @@ class UAnimMontage;
 class UAnimSequence;
 class USoundBase;
 
-// Delegate disparado cuando cambia la vida; los listeners (UI, BPs) reciben los valores actualizados
+// Delegate fired when health changes; listeners (UI, BPs) receive the updated values
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnHealthChangedSignature, float, CurrentHealth, float, MaxHealth);
 
 UCLASS()
@@ -19,7 +19,7 @@ class PROTODUNGEONSW2_API ADPCharacterBase : public ACharacter
 public:
 	ADPCharacterBase();
 
-	// Override de AActor::TakeDamage — punto de entrada estándar de UE para daño
+	// Override of AActor::TakeDamage — UE's standard entry point for damage
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Stats")
@@ -28,38 +28,38 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Stats")
 	bool IsDead() const { return bIsDead; }
 
-	// Listeners (UI, BP) se suscriben aquí para reaccionar a cambios de vida
+	// Listeners (UI, BP) subscribe here to react to health changes
 	UPROPERTY(BlueprintAssignable, Category = "Stats")
 	FOnHealthChangedSignature OnHealthChanged;
 
-	// Reacción al recibir daño desde delante
+	// Reaction when taking damage from the front
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat|Animation")
 	TObjectPtr<UAnimMontage> HitReactFrontMontage;
 
-	// Reacción al recibir daño desde detrás
+	// Reaction when taking damage from behind
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat|Animation")
 	TObjectPtr<UAnimMontage> HitReactBackMontage;
 
-	// Animación de muerte (one-shot). Si está asignada, se reproduce vía PlayAnimation
-	// y mantiene el último frame. Si es nullptr, el actor muere sin animación específica.
+	// Death animation (one-shot). If assigned, it plays via PlayAnimation
+	// and holds the last frame. If nullptr, the actor dies with no specific animation.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat|Animation")
 	TObjectPtr<UAnimSequence> DeathAnimation;
 
-	// Sonido reproducido en la posición del actor al recibir daño no letal (gruñido).
-	// Si es nullptr, no suena nada. La muerte tiene su propio feedback.
+	// Sound played at the actor's location when taking non-lethal damage (grunt).
+	// If nullptr, nothing plays. Death has its own feedback.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat|Audio")
 	TObjectPtr<USoundBase> DamageSound;
 
 protected:
 	virtual void BeginPlay() override;
 
-	// Hook de muerte: las clases derivadas pueden override para ragdoll, despawn, drops, etc.
+	// Death hook: derived classes can override for ragdoll, despawn, drops, etc.
 	virtual void OnDeath();
 
-	// Dispara el delegate OnHealthChanged con los valores actuales de vida.
+	// Fires the OnHealthChanged delegate with the current health values.
 	virtual void BroadcastHealthChange();
 
-	// Reproduce el AnimMontage de hit reaction apropiado según la dirección del atacante.
+	// Plays the appropriate hit reaction AnimMontage based on the attacker's direction.
 	virtual void PlayHitReaction(AActor* DamageCauser);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Stats", meta = (ClampMin = "1.0"))
@@ -71,12 +71,12 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Stats")
 	bool bIsDead = false;
 
-	// Si true, al morir este character solicita al UDPLevelTransitionSubsystem cargar NextLevelName.
-	// Pensado para enemigos clave del nivel; los players y enemigos genéricos lo dejan en false.
+	// If true, when this character dies it asks the UDPLevelTransitionSubsystem to load NextLevelName.
+	// Intended for key enemies in a level; players and generic enemies leave this as false.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Transition")
 	bool bTriggersLevelTransitionOnDeath = false;
 
-	// Mapa destino al morir cuando bTriggersLevelTransitionOnDeath = true.
+	// Destination map on death when bTriggersLevelTransitionOnDeath = true.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Transition")
 	FName NextLevelName = NAME_None;
 };

@@ -10,12 +10,12 @@ UDPBTService_UpdateTarget::UDPBTService_UpdateTarget()
 {
 	NodeName = TEXT("Update Target");
 
-	// Tick periódico: cada 0.2s con +/-0.05s de variación para desincronizar enemigos
+	// Periodic tick: every 0.2s with +/-0.05s deviation to desynchronize enemies
 	Interval = 0.2f;
 	RandomDeviation = 0.05f;
 
-	// Filtros de tipo en el editor: TargetActor solo acepta keys de tipo Object/AActor;
-	// IsInAttackRange solo acepta keys de tipo Bool
+	// Type filters in the editor: TargetActor only accepts keys of type Object/AActor;
+	// IsInAttackRange only accepts keys of type Bool
 	TargetActorKey.AddObjectFilter(this, GET_MEMBER_NAME_CHECKED(UDPBTService_UpdateTarget, TargetActorKey), AActor::StaticClass());
 	IsInAttackRangeKey.AddBoolFilter(this, GET_MEMBER_NAME_CHECKED(UDPBTService_UpdateTarget, IsInAttackRangeKey));
 }
@@ -24,7 +24,7 @@ void UDPBTService_UpdateTarget::InitializeFromAsset(UBehaviorTree& Asset)
 {
 	Super::InitializeFromAsset(Asset);
 
-	// Resolver los IDs de las keys seleccionadas contra el BB del asset
+	// Resolve the selected keys' IDs against the asset's BB
 	if (UBlackboardData* BBAsset = GetBlackboardAsset())
 	{
 		TargetActorKey.ResolveSelectedKey(*BBAsset);
@@ -57,7 +57,7 @@ void UDPBTService_UpdateTarget::TickNode(UBehaviorTreeComponent& OwnerComp, uint
 	APawn* Player = UGameplayStatics::GetPlayerPawn(SelfPawn->GetWorld(), 0);
 	if (!Player)
 	{
-		// Sin jugador en el mundo: limpiar target y marcar fuera de rango
+		// No player in the world: clear target and mark out of range
 		BBComp->ClearValue(TargetActorKey.SelectedKeyName);
 		BBComp->SetValueAsBool(IsInAttackRangeKey.SelectedKeyName, false);
 		return;
@@ -65,7 +65,7 @@ void UDPBTService_UpdateTarget::TickNode(UBehaviorTreeComponent& OwnerComp, uint
 
 	const float Distance = FVector::Dist(SelfPawn->GetActorLocation(), Player->GetActorLocation());
 
-	// Detección: dentro del radio se asigna como target; fuera, se limpia
+	// Detection: inside the radius it's assigned as target; outside, it's cleared
 	if (Distance <= DetectionRadius)
 	{
 		BBComp->SetValueAsObject(TargetActorKey.SelectedKeyName, Player);
@@ -75,7 +75,7 @@ void UDPBTService_UpdateTarget::TickNode(UBehaviorTreeComponent& OwnerComp, uint
 		BBComp->ClearValue(TargetActorKey.SelectedKeyName);
 	}
 
-	// Rango de ataque: bool independiente del target (puede haber target visible pero lejos)
+	// Attack range: bool independent of the target (a target can be visible but far away)
 	const bool bInRange = (Distance <= AttackRange);
 	BBComp->SetValueAsBool(IsInAttackRangeKey.SelectedKeyName, bInRange);
 }

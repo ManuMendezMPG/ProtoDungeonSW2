@@ -12,8 +12,8 @@ class PROTODUNGEONSW2_API ADPInteractableBase : public AActor
 public:
 	ADPInteractableBase();
 
-	// Llamado cuando el player interactúa con este actor (pulsa E estando en range).
-	// Las clases derivadas hacen override para implementar comportamiento específico.
+	// Called when the player interacts with this actor (presses E while in range).
+	// Derived classes override to implement specific behavior.
 	UFUNCTION(BlueprintCallable, Category = "Interaction")
 	virtual void Interact(AActor* InteractingActor);
 };

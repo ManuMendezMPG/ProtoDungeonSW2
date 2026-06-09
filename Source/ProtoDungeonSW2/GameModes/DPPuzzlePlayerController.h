@@ -21,27 +21,27 @@ public:
 	ADPPuzzlePlayerController();
 
 protected:
-	// Pawn de tipo player character. Se encuentra en el mapa al iniciar.
+	// Player character pawn. Found in the map on init.
 	UPROPERTY(BlueprintReadOnly, Category = "Puzzle")
 	TObjectPtr<ADPPlayerCharacter> PlayerCharacterPawn;
 
-	// Pawn de tipo bola. Se encuentra en el mapa al iniciar.
+	// Ball pawn. Found in the map on init.
 	UPROPERTY(BlueprintReadOnly, Category = "Puzzle")
 	TObjectPtr<ADPPuzzleBall> BallPawn;
 
-	// Contexto de input registrado en BeginPlay (asignar el asset desde el BP del PlayerController).
+	// Input context registered in BeginPlay (assign the asset from the PlayerController BP).
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputMappingContext> InputMappingContext;
 
-	// Acción que alterna Docked/Handheld. Sobrevive al cambio de pawn porque vive en el controller.
+	// Action that toggles Docked/Handheld. Survives pawn changes because it lives on the controller.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> ToggleModeAction;
 
-	// Referencia cacheada al subsystem de gyro para no buscarlo cada frame en PlayerTick.
+	// Cached reference to the gyro subsystem so we don't look it up every frame in PlayerTick.
 	UPROPERTY()
 	TObjectPtr<UDPGyroInputSubsystem> CachedGyroSubsystem;
 
-	// Camera Actor del laberinto (buscado por tag "PuzzleCamera" en BeginPlay).
+	// Maze Camera Actor (looked up by tag "PuzzleCamera" in BeginPlay).
 	UPROPERTY()
 	TObjectPtr<ACameraActor> PuzzleCameraActor;
 
@@ -50,14 +50,14 @@ protected:
 	virtual void SetupInputComponent() override;
 	virtual void PlayerTick(float DeltaTime) override;
 
-	// Llamado cuando el modo del subsistema cambia. Cambia la posesión al pawn correspondiente.
+	// Called when the subsystem's mode changes. Switches possession to the corresponding pawn.
 	UFUNCTION()
 	void OnPlatformModeChanged(EDPPlatformMode NewMode);
 
-	// Helpers para encontrar los pawns en el mapa.
+	// Helpers to find the pawns in the map.
 	void FindPawnsInLevel();
 
-	// Busca un ACameraActor con tag "PuzzleCamera" en el nivel.
+	// Looks for an ACameraActor tagged "PuzzleCamera" in the level.
 	void FindPuzzleCameraInLevel();
 
 private:

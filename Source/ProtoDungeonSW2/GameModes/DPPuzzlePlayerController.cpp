@@ -12,20 +12,20 @@
 
 ADPPuzzlePlayerController::ADPPuzzlePlayerController()
 {
-	// Constructor vacío. La inicialización va en BeginPlay porque necesitamos el mundo.
+	// Empty constructor. Initialization happens in BeginPlay because we need the world.
 }
 
 void ADPPuzzlePlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Buscar los pawns en el mapa.
+	// Find the pawns in the map.
 	FindPawnsInLevel();
 
-	// Buscar el Camera Actor del laberinto (tag "PuzzleCamera").
+	// Find the maze Camera Actor (tag "PuzzleCamera").
 	FindPuzzleCameraInLevel();
 
-	// Registrar el mapping context del controller (sobrevive al cambio de pawn)
+	// Register the controller's mapping context (survives pawn changes)
 	if (InputMappingContext != nullptr)
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* InputSubsystem =
@@ -35,15 +35,15 @@ void ADPPuzzlePlayerController::BeginPlay()
 		}
 	}
 
-	// Suscribirse al cambio de modo.
+	// Subscribe to mode changes.
 	if (UDPPlatformModeSubsystem* PlatformSubsystem = GetGameInstance()->GetSubsystem<UDPPlatformModeSubsystem>())
 	{
 		PlatformSubsystem->OnPlatformModeChanged.AddDynamic(this, &ADPPuzzlePlayerController::OnPlatformModeChanged);
 
-		// Cachear el gyro subsystem para uso en PlayerTick.
+		// Cache the gyro subsystem for use in PlayerTick.
 		CachedGyroSubsystem = GetGameInstance()->GetSubsystem<UDPGyroInputSubsystem>();
 
-		// Al iniciar, el modo es Docked, así que poseemos al player character.
+		// On startup the mode is Docked, so we possess the player character.
 		OnPlatformModeChanged(PlatformSubsystem->CurrentMode);
 	}
 }
@@ -73,7 +73,7 @@ void ADPPuzzlePlayerController::PlayerTick(float DeltaTime)
 {
 	Super::PlayerTick(DeltaTime);
 
-	// Solo alimentamos el gyro si está activo (modo Handheld).
+	// Only feed the gyro if it's active (Handheld mode).
 	if (CachedGyroSubsystem == nullptr || !CachedGyroSubsystem->bGyroActive)
 	{
 		return;
@@ -83,14 +83,14 @@ void ADPPuzzlePlayerController::PlayerTick(float DeltaTime)
 	float MouseDeltaY = 0.f;
 	GetInputMouseDelta(MouseDeltaX, MouseDeltaY);
 
-	// Iteración para Camera Actor con Yaw=-90 (candidato 2): mapeo directo Mouse X→X, Mouse Y→Y.
+	// Iteration for Camera Actor with Yaw=-90 (candidate 2): direct mapping Mouse X→X, Mouse Y→Y.
 	const FVector2D Delta(MouseDeltaX, -MouseDeltaY);
 	CachedGyroSubsystem->FeedTiltDelta(Delta);
 }
 
 void ADPPuzzlePlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	// Limpieza: desuscribirse del subsistema.
+	// Cleanup: unsubscribe from the subsystem.
 	if (UGameInstance* GameInst = GetGameInstance())
 	{
 		if (UDPPlatformModeSubsystem* PlatformSubsystem = GameInst->GetSubsystem<UDPPlatformModeSubsystem>())
@@ -104,7 +104,7 @@ void ADPPuzzlePlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason
 
 void ADPPuzzlePlayerController::FindPawnsInLevel()
 {
-	// Buscar el ADPPlayerCharacter en el mapa.
+	// Find the ADPPlayerCharacter in the map.
 	TArray<AActor*> FoundCharacters;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ADPPlayerCharacter::StaticClass(), FoundCharacters);
 	if (FoundCharacters.Num() > 0)
@@ -112,7 +112,7 @@ void ADPPuzzlePlayerController::FindPawnsInLevel()
 		PlayerCharacterPawn = Cast<ADPPlayerCharacter>(FoundCharacters[0]);
 	}
 
-	// Buscar el ADPPuzzleBall en el mapa.
+	// Find the ADPPuzzleBall in the map.
 	TArray<AActor*> FoundBalls;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ADPPuzzleBall::StaticClass(), FoundBalls);
 	if (FoundBalls.Num() > 0)
@@ -143,13 +143,13 @@ void ADPPuzzlePlayerController::FindPuzzleCameraInLevel()
 
 void ADPPuzzlePlayerController::OnPlatformModeChanged(EDPPlatformMode NewMode)
 {
-	// Activar/desactivar gyro según el modo (independiente del estado de los pawns).
+	// Enable/disable gyro based on the mode (independent of pawn state).
 	if (CachedGyroSubsystem != nullptr)
 	{
 		CachedGyroSubsystem->SetGyroActive(NewMode == EDPPlatformMode::Handheld);
 	}
 
-	// Si todavía no hemos encontrado los pawns, no hacemos nada (todavía no está listo el mapa).
+	// If we haven't found the pawns yet, do nothing (the map isn't ready yet).
 	if (PlayerCharacterPawn == nullptr || BallPawn == nullptr)
 	{
 		return;
@@ -157,19 +157,19 @@ void ADPPuzzlePlayerController::OnPlatformModeChanged(EDPPlatformMode NewMode)
 
 	if (NewMode == EDPPlatformMode::Handheld)
 	{
-		// Tomar control de la bola.
+		// Take control of the ball.
 		Possess(BallPawn);
 
-		// ViewTarget al Camera Actor del laberinto; fallback a la bola si no hay
+		// ViewTarget to the maze Camera Actor; fallback to the ball if none
 		AActor* TargetViewTarget = (PuzzleCameraActor != nullptr) ? Cast<AActor>(PuzzleCameraActor) : Cast<AActor>(BallPawn);
 		SetViewTargetWithBlend(TargetViewTarget, 0.0f, EViewTargetBlendFunction::VTBlend_EaseInOut);
 	}
 	else // Docked
 	{
-		// Tomar control del player character.
+		// Take control of the player character.
 		Possess(PlayerCharacterPawn);
 
-		// ViewTarget de vuelta al player character (su cámara isométrica)
+		// ViewTarget back to the player character (its isometric camera)
 		SetViewTargetWithBlend(PlayerCharacterPawn, 0.0f, EViewTargetBlendFunction::VTBlend_EaseInOut);
 	}
 }

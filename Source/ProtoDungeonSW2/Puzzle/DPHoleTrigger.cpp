@@ -9,7 +9,7 @@ ADPHoleTrigger::ADPHoleTrigger()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
-	// Trigger box como root: solo overlap, no bloquea nada
+	// Trigger box as root: overlap only, blocks nothing
 	TriggerBox = CreateDefaultSubobject<UBoxComponent>(TEXT("TriggerBox"));
 	TriggerBox->SetBoxExtent(FVector(100.f, 100.f, 100.f));
 	TriggerBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
@@ -35,7 +35,7 @@ void ADPHoleTrigger::OnTriggerBeginOverlap(
 	bool bFromSweep,
 	const FHitResult& SweepResult)
 {
-	// Solo nos interesa la bola del puzzle
+	// We only care about the puzzle ball
 	ADPPuzzleBall* Ball = Cast<ADPPuzzleBall>(OtherActor);
 	if (Ball == nullptr)
 	{
@@ -48,19 +48,19 @@ void ADPHoleTrigger::OnTriggerBeginOverlap(
 		return;
 	}
 
-	// 1) Notificar al subsystem de estado del puzzle
+	// 1) Notify the puzzle state subsystem
 	if (UDPPuzzleStateSubsystem* PuzzleState = GameInst->GetSubsystem<UDPPuzzleStateSubsystem>())
 	{
 		PuzzleState->NotifyBallReachedGoal();
 	}
 
-	// 2) Cambiar el modo a Docked ANTES de destruir la bola: el PlayerController necesita
-	//    que ambos pawns sigan vivos para poder hacer Possess(PlayerCharacterPawn).
+	// 2) Switch to Docked mode BEFORE destroying the ball: the PlayerController needs
+	//    both pawns alive to be able to Possess(PlayerCharacterPawn).
 	if (UDPPlatformModeSubsystem* PlatformMode = GameInst->GetSubsystem<UDPPlatformModeSubsystem>())
 	{
 		PlatformMode->SetPlatformMode(EDPPlatformMode::Docked);
 	}
 
-	// 3) Destruir la bola — ya hemos hecho el switch al player character
+	// 3) Destroy the ball — we have already switched to the player character
 	Ball->Destroy();
 }

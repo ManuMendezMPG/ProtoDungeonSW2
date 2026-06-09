@@ -4,17 +4,17 @@
 
 ADPEnemyBase::ADPEnemyBase()
 {
-	// Controlador de IA propio del proyecto; las subclases pueden sustituirlo
+	// Project-specific AI controller; subclasses can replace it
 	AIControllerClass = ADPEnemyAIController::StaticClass();
 
-	// Que el AIController posea al pawn tanto si está colocado en el mapa como si se spawnea en runtime
+	// Have the AIController possess the pawn whether it's placed in the map or spawned at runtime
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
-	// Los enemigos son más débiles que el jugador por defecto
+	// Enemies are weaker than the player by default
 	MaxHealth = 50.f;
 	CurrentHealth = MaxHealth;
 
-	// Componente de combate con valores ajustados para enemigos
+	// Combat component with values tuned for enemies
 	CombatComponent = CreateDefaultSubobject<UDPCombatComponent>(TEXT("CombatComponent"));
 	CombatComponent->BasicAttackDamage   = 10.f;
 	CombatComponent->BasicAttackRange    = 120.f;
@@ -24,9 +24,9 @@ ADPEnemyBase::ADPEnemyBase()
 
 void ADPEnemyBase::OnDeath()
 {
-	// Comportamiento base: mensaje en pantalla, desactivar colisión, parar movimiento
+	// Base behavior: on-screen message, disable collision, stop movement
 	Super::OnDeath();
 
-	// Pequeño retardo para que la "muerte" sea visible antes de desaparecer
+	// Small delay so the "death" is visible before disappearing
 	SetLifeSpan(2.f);
 }

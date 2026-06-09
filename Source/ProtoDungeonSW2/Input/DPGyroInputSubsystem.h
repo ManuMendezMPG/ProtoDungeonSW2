@@ -13,39 +13,39 @@ class PROTODUNGEONSW2_API UDPGyroInputSubsystem : public UGameInstanceSubsystem
 	GENERATED_BODY()
 
 public:
-	// Inclinación actual en X (pitch) e Y (roll), valores entre -1 y 1.
-	// X positivo = inclinado hacia delante (Norte en vista cenital).
-	// Y positivo = inclinado hacia la derecha.
+	// Current tilt on X (pitch) and Y (roll), values between -1 and 1.
+	// Positive X = tilted forward (North in top-down view).
+	// Positive Y = tilted to the right.
 	UPROPERTY(BlueprintReadOnly, Category = "Gyro")
 	FVector2D CurrentTilt;
 
-	// Cuánto recoger del delta de input cada vez que llega (sensibilidad).
+	// How much of the input delta to pick up each time it arrives (sensitivity).
 	UPROPERTY(BlueprintReadWrite, Category = "Gyro")
 	float TiltSensitivity = 0.05f;
 
-	// Cuánto se "vuelve al centro" la inclinación pasivamente cuando no hay input (por segundo).
-	// 0 = no vuelve. 1 = vuelve al centro completo en 1 segundo.
+	// How much the tilt passively "returns to center" when there's no input (per second).
+	// 0 = never returns. 1 = fully returns to center in 1 second.
 	UPROPERTY(BlueprintReadWrite, Category = "Gyro")
 	float CenteringSpeed = 2.0f;
 
-	// Límite máximo absoluto de inclinación en cada eje.
+	// Maximum absolute tilt limit on each axis.
 	UPROPERTY(BlueprintReadWrite, Category = "Gyro")
 	float MaxTilt = 1.0f;
 
-	// Delegate cuando cambia el tilt.
+	// Delegate fired when the tilt changes.
 	UPROPERTY(BlueprintAssignable, Category = "Gyro")
 	FOnTiltChangedSignature OnTiltChanged;
 
-	// Punto de entrada de input desde el caller (BP en PC, plugin de JoyCon en Switch).
-	// Delta normalizado: el caller debe pasar el delta ya escalado (ej: delta del ratón).
+	// Input entry point from the caller (BP on PC, JoyCon plugin on Switch).
+	// Normalized delta: the caller must pass the already-scaled delta (e.g. mouse delta).
 	UFUNCTION(BlueprintCallable, Category = "Gyro")
 	void FeedTiltDelta(FVector2D Delta);
 
-	// Resetea el tilt al centro manualmente.
+	// Resets the tilt to center manually.
 	UFUNCTION(BlueprintCallable, Category = "Gyro")
 	void ResetTilt();
 
-	// Para activar/desactivar el procesamiento (cuando estamos fuera del modo puzzle).
+	// To enable/disable processing (when we're outside puzzle mode).
 	UFUNCTION(BlueprintCallable, Category = "Gyro")
 	void SetGyroActive(bool bActive);
 
@@ -57,7 +57,7 @@ public:
 	virtual void Deinitialize() override;
 
 protected:
-	// Tick de centering: los subsystems no tienen tick nativo, usamos FTSTicker.
+	// Centering tick: subsystems don't have a native tick, we use FTSTicker.
 	void TickCentering(float DeltaTime);
 
 	FTSTicker::FDelegateHandle TickerHandle;

@@ -23,86 +23,86 @@ class PROTODUNGEONSW2_API UDPCombatComponent : public UActorComponent
 public:
 	UDPCombatComponent();
 
-	// Ataque básico (botón)
+	// Basic attack (button)
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void TryBasicAttack();
 
-	// Ataque especial (gesto JoyCon, simulado en PC)
+	// Special attack (JoyCon gesture, simulated on PC)
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void TrySpecialAttack();
 
-	// Llamada desde Anim Notify cuando el momento de daño de un ataque debe aplicarse.
+	// Called from an Anim Notify when an attack's damage moment should be applied.
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void OnDamageNotify();
 
-	// Daño del ataque básico
+	// Basic attack damage
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
 	float BasicAttackDamage = 25.f;
 
-	// Daño del ataque especial
+	// Special attack damage
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
 	float SpecialAttackDamage = 50.f;
 
-	// Distancia desde el owner al centro de la esfera de impacto del ataque básico
+	// Distance from the owner to the center of the basic attack's hit sphere
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
 	float BasicAttackRange = 80.f;
 
-	// Distancia desde el owner al centro de la esfera de impacto del ataque especial
+	// Distance from the owner to the center of the special attack's hit sphere
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
 	float SpecialAttackRange = 95.f;
 
-	// Radio de la esfera de detección de impactos
+	// Radius of the hit detection sphere
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
 	float AttackRadius = 45.f;
 
-	// Si está activo, dibuja en pantalla la esfera de detección durante 1s
+	// If enabled, draws the detection sphere on screen for 1s
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat|Debug")
 	bool bDrawDebugAttacks = true;
 
-	// Cooldown del ataque básico (segundos)
+	// Basic attack cooldown (seconds)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (ClampMin = "0.0"))
 	float BasicAttackCooldown = 0.5f;
 
-	// Cooldown del ataque especial (segundos). Bloquea TANTO básico como especial mientras está activo.
+	// Special attack cooldown (seconds). Blocks BOTH basic and special while active.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (ClampMin = "0.0"))
 	float SpecialAttackCooldown = 1.0f;
 
-	// Montage del ataque básico. Si está asignado, TryBasicAttack lo reproduce y el daño
-	// se aplica vía OnDamageNotify (llamado desde un Anim Notify). Si es nullptr, el daño
-	// se aplica al instante (flujo legacy usado por enemigos sin montage).
+	// Basic attack montage. If assigned, TryBasicAttack plays it and damage is
+	// applied via OnDamageNotify (called from an Anim Notify). If nullptr, damage
+	// is applied instantly (legacy flow used by enemies without a montage).
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat|Animation")
 	TObjectPtr<UAnimMontage> BasicAttackMontage;
 
-	// Montage del ataque especial (mismo patrón que BasicAttackMontage).
+	// Special attack montage (same pattern as BasicAttackMontage).
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat|Animation")
 	TObjectPtr<UAnimMontage> SpecialAttackMontage;
 
-	// Sonido reproducido en la posición de cada actor impactado en PerformAttack.
-	// Si es nullptr o el ataque no impacta a nadie, no se reproduce nada.
+	// Sound played at the location of each actor hit in PerformAttack.
+	// If nullptr or the attack hits nothing, nothing plays.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat|Audio")
 	TObjectPtr<USoundBase> HitImpactSound;
 
-	// ¿Puede dispararse ahora un ataque básico? (false si su propio CD activo o si el especial bloquea)
+	// Can a basic attack fire right now? (false if its own CD is active or the special blocks it)
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Combat")
 	bool CanBasicAttack() const;
 
-	// ¿Puede dispararse ahora un ataque especial? (solo lo bloquea su propio CD)
+	// Can a special attack fire right now? (only its own CD blocks it)
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Combat")
 	bool CanSpecialAttack() const;
 
 protected:
-	// Lógica compartida: detecta personajes en una esfera delante del owner y les aplica daño
+	// Shared logic: detects characters in a sphere in front of the owner and applies damage to them
 	void PerformAttack(float Damage, float Range);
 
-	// Tipo de ataque actualmente en curso (None si ningún montage activo). Lo consulta
-	// OnDamageNotify para saber qué daño/rango aplicar.
+	// Attack type currently in progress (None if no montage active). Consulted by
+	// OnDamageNotify to know which damage/range to apply.
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat|State")
 	EDPAttackType CurrentAttackType;
 
 private:
-	// Estado runtime: timestamp del último uso (en segundos de juego). Inicializado lejos
-	// en el pasado para que el primer ataque siempre pueda dispararse. No es UPROPERTY:
-	// no se expone al editor ni se serializa.
+	// Runtime state: timestamp of last use (in game seconds). Initialized far
+	// in the past so the first attack can always fire. Not a UPROPERTY:
+	// not exposed to the editor and not serialized.
 	float LastBasicAttackTime = -1000.f;
 	float LastSpecialAttackTime = -1000.f;
 };

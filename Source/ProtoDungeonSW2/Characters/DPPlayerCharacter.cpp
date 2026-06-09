@@ -20,17 +20,17 @@
 
 ADPPlayerCharacter::ADPPlayerCharacter()
 {
-	// El personaje no rota con el controller — la cámara es fija isométrica
+	// The character doesn't rotate with the controller — the camera is a fixed isometric view
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw   = false;
 	bUseControllerRotationRoll  = false;
 
-	// El personaje rota hacia la dirección de movimiento
+	// The character rotates toward the movement direction
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate              = FRotator(0.f, 640.f, 0.f);
 	GetCharacterMovement()->MaxWalkSpeed              = 500.f;
 
-	// Brazo del resorte con ángulo isométrico fijo
+	// Spring arm with a fixed isometric angle
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetupAttachment(RootComponent);
 	SpringArm->TargetArmLength = 2000.f;
@@ -40,19 +40,19 @@ ADPPlayerCharacter::ADPPlayerCharacter()
 	SpringArm->bInheritYaw      = false;
 	SpringArm->bInheritRoll     = false;
 
-    // NUEVA LÍNEA: rotación absoluta (no hereda la del Character)
+    // NEW LINE: absolute rotation (does not inherit from the Character)
     SpringArm->SetUsingAbsoluteRotation(true);
 
-	// Cámara anclada al extremo del brazo
+	// Camera attached to the end of the arm
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
 	Camera->FieldOfView = 60.f;
 
-	// Componente de combate
+	// Combat component
 	CombatComponent = CreateDefaultSubobject<UDPCombatComponent>(TEXT("CombatComponent"));
 
-	// Esfera de detección de interactables. Object type WorldDynamic + respuesta Overlap a WorldDynamic
-	// (los interactables son WorldDynamic). La suscripción a los eventos va en BeginPlay.
+	// Interactable detection sphere. Object type WorldDynamic + Overlap response to WorldDynamic
+	// (interactables are WorldDynamic). Event subscription happens in BeginPlay.
 	InteractionSphere = CreateDefaultSubobject<USphereComponent>(TEXT("InteractionSphere"));
 	InteractionSphere->SetupAttachment(RootComponent);
 	InteractionSphere->SetSphereRadius(150.f);
@@ -67,7 +67,7 @@ void ADPPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Registrar el contexto de input con prioridad 0
+	// Register the input context with priority 0
 	if (APlayerController* PC = Cast<APlayerController>(GetController()))
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem =
@@ -77,10 +77,10 @@ void ADPPlayerCharacter::BeginPlay()
 		}
 	}
 
-	// Asegurar estado de input correcto al spawnear: tras un Game Over Retry,
-	// el viewport del editor puede mantener el InputMode anterior (UIOnly).
-	// Forzamos GameOnly y ocultamos el cursor para que el gameplay reciba
-	// input correctamente desde el primer frame.
+	// Ensure correct input state on spawn: after a Game Over Retry,
+	// the editor viewport can retain the previous InputMode (UIOnly).
+	// We force GameOnly and hide the cursor so gameplay receives
+	// input correctly from the first frame.
 	if (APlayerController* PC = Cast<APlayerController>(GetController()))
 	{
 		FInputModeGameOnly InputMode;
@@ -89,7 +89,7 @@ void ADPPlayerCharacter::BeginPlay()
 		EnableInput(PC);
 	}
 
-	// Suscribirse a overlaps de la esfera de interacción
+	// Subscribe to overlaps of the interaction sphere
 	if (InteractionSphere)
 	{
 		InteractionSphere->OnComponentBeginOverlap.AddDynamic(this, &ADPPlayerCharacter::OnInteractionSphereBeginOverlap);
@@ -160,7 +160,7 @@ void ADPPlayerCharacter::OnInteractionSphereBeginOverlap(
 {
 	if (ADPInteractableBase* Interactable = Cast<ADPInteractableBase>(OtherActor))
 	{
-		// Sobrescribe cualquier interactable previo: el último que entra gana
+		// Overrides any previous interactable: the most recent entrant wins
 		CurrentInteractable = Interactable;
 	}
 }
@@ -169,8 +169,8 @@ void ADPPlayerCharacter::OnInteractionSphereEndOverlap(
 	UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	// Solo limpiamos si el que sale es el que teníamos en range
-	// (si entramos en A, luego B, y salimos de A, seguimos teniendo B disponible)
+	// Only clear if the one leaving is the one we had in range
+	// (if we enter A, then B, and leave A, we still have B available)
 	if (OtherActor == CurrentInteractable)
 	{
 		CurrentInteractable = nullptr;
@@ -187,21 +187,21 @@ void ADPPlayerCharacter::OnInteractPressed()
 
 void ADPPlayerCharacter::OnDeath()
 {
-	// Comportamiento heredado: reproduce DeathAnimation, desactiva
-	// collision, detiene movement, opcionalmente transiciona de nivel
+	// Inherited behavior: plays DeathAnimation, disables
+	// collision, stops movement, optionally triggers a level transition
 	Super::OnDeath();
 
-	// Bloquear input del player para que no pueda moverse / atacar
-	// mientras se reproduce la animación de muerte
+	// Block the player's input so they can't move / attack
+	// while the death animation plays
 	APlayerController* PC = Cast<APlayerController>(GetController());
 	if (PC)
 	{
 		DisableInput(PC);
 	}
 
-	// Programar la aparición del Game Over para cuando termine la
-	// animación de muerte. Si no hay animación, fallback a 2 segundos
-	// para que el jugador procese el momento antes de ver el widget
+	// Schedule the Game Over to appear when the death
+	// animation ends. With no animation, fall back to 2 seconds
+	// so the player processes the moment before seeing the widget
 	float Delay = 2.0f;
 	if (DeathAnimation)
 	{
@@ -219,8 +219,8 @@ void ADPPlayerCharacter::ShowGameOverScreen()
 	if (!GameOverWidgetClass)
 	{
 		UE_LOG(LogTemp, Warning,
-			TEXT("ADPPlayerCharacter: GameOverWidgetClass no asignado. "
-				 "Asignar WBP_GameOver en el Blueprint."));
+			TEXT("ADPPlayerCharacter: GameOverWidgetClass not assigned. "
+				 "Assign WBP_GameOver in the Blueprint."));
 		return;
 	}
 
@@ -230,7 +230,7 @@ void ADPPlayerCharacter::ShowGameOverScreen()
 		return;
 	}
 
-	// Crear y mostrar el widget
+	// Create and show the widget
 	UUserWidget* GameOverWidget = CreateWidget<UUserWidget>(
 		PC, GameOverWidgetClass);
 	if (GameOverWidget)
@@ -238,16 +238,16 @@ void ADPPlayerCharacter::ShowGameOverScreen()
 		GameOverWidget->AddToViewport();
 	}
 
-	// Configurar input para UI: ratón visible, eventos de UI activos,
-	// sin captura de input de gameplay
+	// Configure input for UI: mouse visible, UI events active,
+	// no gameplay input capture
 	PC->SetShowMouseCursor(true);
 	FInputModeUIOnly InputMode;
 	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 	PC->SetInputMode(InputMode);
 
-	// Pausar el juego para congelar enemigos y mantener la pose de
-	// muerte del player en su último frame. El UI tick sigue
-	// funcionando para el botón Retry
+	// Pause the game to freeze enemies and hold the player's
+	// death pose at its last frame. The UI tick keeps
+	// working for the Retry button
 	UGameplayStatics::SetGamePaused(this, true);
 }
 

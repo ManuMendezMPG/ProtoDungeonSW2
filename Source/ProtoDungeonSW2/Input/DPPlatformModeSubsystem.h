@@ -24,8 +24,8 @@ public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
 
-	// Accessores BlueprintPure. Source of truth para cualquier sistema que
-	// dependa del modo (cámara, HUD, post-process, scalability).
+	// BlueprintPure accessors. Source of truth for any system that
+	// depends on the mode (camera, HUD, post-process, scalability).
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Platform Mode")
 	EDPPlatformMode GetCurrentMode() const { return CurrentMode; }
 
@@ -35,36 +35,36 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Platform Mode")
 	bool IsDocked() const { return CurrentMode == EDPPlatformMode::Docked; }
 
-	// Setea directamente un modo (útil para Switch 2 cuando el SDK dé el estado real,
-	// o para forzar Docked al entrar al puzzle, etc). Notifica si difiere del actual.
+	// Set a mode directly (useful for Switch 2 when the SDK exposes the real state,
+	// or to force Docked when entering the puzzle, etc). Notifies if it differs from the current one.
 	UFUNCTION(BlueprintCallable, Category = "Platform Mode")
 	void SetPlatformMode(EDPPlatformMode NewMode);
 
-	// Alterna entre Docked y Handheld. Lo llama BP_PlayerCharacter al pulsar M en PC.
+	// Toggles between Docked and Handheld. Called by BP_PlayerCharacter when M is pressed on PC.
 	UFUNCTION(BlueprintCallable, Category = "Platform Mode")
 	void TogglePlatformMode();
 
-	// Delegate broadcast al cambiar el modo. Los listeners (cámara, HUD,
-	// post-process, scalability) se suscriben aquí.
+	// Delegate broadcast on mode change. Listeners (camera, HUD,
+	// post-process, scalability) subscribe here.
 	UPROPERTY(BlueprintAssignable, Category = "Platform Mode")
 	FOnPlatformModeChangedSignature OnPlatformModeChanged;
 
-	// Modo actual cacheado. Source of truth para todo el sistema.
-	// Se mantiene público (BlueprintReadOnly) por compatibilidad con C++ existente
-	// que lo lee directamente; los nuevos call sites deberían usar GetCurrentMode().
+	// Cached current mode. Source of truth for the whole system.
+	// Kept public (BlueprintReadOnly) for compatibility with existing C++
+	// that reads it directly; new call sites should use GetCurrentMode().
 	UPROPERTY(BlueprintReadOnly, Category = "Platform Mode")
 	EDPPlatformMode CurrentMode = EDPPlatformMode::Docked;
 
 private:
-	// Timer handle para el polling del SDK en Switch. En PC el timer está
-	// inactivo (el toggle es manual).
+	// Timer handle for SDK polling on Switch. On PC the timer is
+	// inactive (toggling is manual).
 	FTimerHandle PollingTimerHandle;
 
-	// Consulta al SDK de plataforma el modo físico actual. Solo tiene
-	// sentido llamarlo en builds de Switch. En PC devuelve siempre
-	// CurrentMode (no hace polling).
+	// Queries the platform SDK for the current physical mode. Only meaningful
+	// in Switch builds. On PC it always returns
+	// CurrentMode (no polling).
 	EDPPlatformMode QueryPlatformMode() const;
 
-	// Callback del timer en Switch: consulta el modo y si difiere, lo aplica.
+	// Timer callback on Switch: queries the mode and if it differs, applies it.
 	void PollPlatformMode();
 };

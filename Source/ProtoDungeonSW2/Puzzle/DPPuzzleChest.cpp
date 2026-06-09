@@ -9,7 +9,7 @@ ADPPuzzleChest::ADPPuzzleChest()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
-	// Skeletal mesh como root: reemplaza el scene root por defecto.
+	// Skeletal mesh as root: replaces the default scene root.
 	ChestMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("ChestMesh"));
 	RootComponent = ChestMesh;
 }
@@ -18,7 +18,7 @@ void ADPPuzzleChest::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Estado inicial: oculto y sin collision hasta que el subsystem nos active.
+	// Initial state: hidden and with no collision until the subsystem activates us.
 	SetActorHiddenInGame(true);
 	SetActorEnableCollision(false);
 
@@ -26,7 +26,7 @@ void ADPPuzzleChest::BeginPlay()
 	{
 		PuzzleState->OnBallReachedGoal.AddDynamic(this, &ADPPuzzleChest::OnBallReachedGoalHandler);
 
-		// Defensivo: si el evento ya se disparó antes de que este cofre existiera, mostrar directamente.
+		// Defensive: if the event already fired before this chest existed, show it directly.
 		if (PuzzleState->bBallReachedGoal)
 		{
 			ShowChest();
@@ -36,7 +36,7 @@ void ADPPuzzleChest::BeginPlay()
 
 void ADPPuzzleChest::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	// Desuscribirse para evitar punteros colgantes si el subsystem sobrevive al actor.
+	// Unsubscribe to avoid dangling pointers if the subsystem outlives the actor.
 	if (UGameInstance* GI = GetGameInstance())
 	{
 		if (UDPPuzzleStateSubsystem* PuzzleState = GI->GetSubsystem<UDPPuzzleStateSubsystem>())
@@ -61,8 +61,8 @@ void ADPPuzzleChest::ShowChest()
 
 void ADPPuzzleChest::Interact(AActor* InteractingActor)
 {
-	// No se puede abrir un cofre dos veces. El flag es la única fuente de verdad;
-	// no tocamos collision para que el cofre siga bloqueando al player tras abrirse.
+	// You can't open a chest twice. The flag is the only source of truth;
+	// we don't touch collision so the chest keeps blocking the player after opening.
 	if (bHasBeenOpened)
 	{
 		return;
@@ -70,8 +70,8 @@ void ADPPuzzleChest::Interact(AActor* InteractingActor)
 
 	bHasBeenOpened = true;
 
-	// PlayAnimation con Loop=false mantiene el último frame: el cofre se queda abierto en pantalla.
-	// Programamos un timer porque PlayAnimation no dispara OnMontageEnded.
+	// PlayAnimation with Loop=false holds the last frame: the chest stays open on screen.
+	// We schedule a timer because PlayAnimation does not fire OnMontageEnded.
 	if (OpenAnimation && ChestMesh)
 	{
 		ChestMesh->PlayAnimation(OpenAnimation, false);
@@ -83,8 +83,8 @@ void ADPPuzzleChest::Interact(AActor* InteractingActor)
 	}
 	else
 	{
-		// Fallback: si no hay animación asignada, ejecuta directamente
-		// la lógica final para que el puzzle no se quede colgado
+		// Fallback: if no animation is assigned, run the final logic
+		// directly so the puzzle doesn't get stuck
 		OnOpenAnimationEnded();
 	}
 }

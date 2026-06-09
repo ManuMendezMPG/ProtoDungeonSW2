@@ -15,46 +15,46 @@ class PROTODUNGEONSW2_API ADPPuzzleChest : public ADPInteractableBase
 public:
 	ADPPuzzleChest();
 
-	// Animación que se reproduce al interactuar (apertura del cofre).
-	// Usamos UAnimSequence + PlayAnimation porque, a diferencia de Montage_Play,
-	// PlayAnimation con Loop=false mantiene el último frame en pantalla.
+	// Animation played on interact (chest opening).
+	// We use UAnimSequence + PlayAnimation because, unlike Montage_Play,
+	// PlayAnimation with Loop=false keeps the last frame on screen.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Puzzle Chest")
 	TObjectPtr<UAnimSequence> OpenAnimation;
 
-	// Mensaje que se solicita mostrar vía UDPMessageSubsystem al abrir el cofre.
+	// Message requested for display via UDPMessageSubsystem when the chest opens.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Puzzle Chest")
-	FString OnOpenMessage = TEXT("Has obtenido una llave");
+	FString OnOpenMessage = TEXT("You found a key");
 
-	// Duración del mensaje on-screen al abrirse.
+	// Duration of the on-screen message when opening.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Puzzle Chest")
 	float OnOpenMessageDuration = 3.0f;
 
-	// Estado interno: si el cofre ya ha sido abierto. Sólo runtime, no editable.
+	// Internal state: whether the chest has already been opened. Runtime only, not editable.
 	UPROPERTY(BlueprintReadOnly, Category = "Puzzle Chest")
 	bool bHasBeenOpened = false;
 
-	// Override: abre el cofre, reproduce montage y al terminar otorga llave + mensaje.
+	// Override: opens the chest, plays the montage, and on completion grants key + message.
 	virtual void Interact(AActor* InteractingActor) override;
 
 protected:
-	// Skeletal mesh del cofre (sirve como root component).
+	// Chest skeletal mesh (acts as the root component).
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<USkeletalMeshComponent> ChestMesh;
 
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
-	// Handler del evento del subsystem: la bola ha llegado a la meta, el cofre se hace visible.
+	// Subsystem event handler: the ball has reached the goal, the chest becomes visible.
 	UFUNCTION()
 	void OnBallReachedGoalHandler();
 
-	// Hace visible y collidable el cofre.
+	// Makes the chest visible and collidable.
 	void ShowChest();
 
-	// Callback al terminar la OpenAnimation (disparado por timer). Otorga la llave y solicita mostrar el mensaje.
+	// Callback when OpenAnimation finishes (fired by timer). Grants the key and requests the message display.
 	void OnOpenAnimationEnded();
 
 private:
-	// Timer que cuenta la duración de OpenAnimation; PlayAnimation no emite OnMontageEnded.
+	// Timer that counts OpenAnimation's duration; PlayAnimation does not fire OnMontageEnded.
 	FTimerHandle OpenAnimTimerHandle;
 };

@@ -3,7 +3,7 @@
 void UDPShakeDetectorSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
-	LastShakeTime = -1000.0f;  // Valor lejano para que el primer shake nunca esté en cooldown.
+	LastShakeTime = -1000.0f;  // Far-past value so the first shake is never on cooldown.
 	InputHistory.Empty();
 }
 
@@ -21,22 +21,22 @@ void UDPShakeDetectorSubsystem::FeedInputDelta(FVector Delta)
 
 	const float CurrentTime = World->GetTimeSeconds();
 
-	// Si estamos en cooldown post-shake, ignoramos input.
+	// If we're in post-shake cooldown, ignore input.
 	if (CurrentTime - LastShakeTime < ShakeCooldown)
 	{
 		return;
 	}
 
-	// Añadir muestra.
+	// Add sample.
 	FInputSample Sample;
 	Sample.Timestamp = CurrentTime;
 	Sample.Magnitude = Delta.Size();
 	InputHistory.Add(Sample);
 
-	// Limpiar muestras viejas.
+	// Clean up old samples.
 	CleanOldSamples(CurrentTime);
 
-	// Verificar si supera threshold.
+	// Check whether it exceeds the threshold.
 	const float Total = GetAccumulatedMagnitude();
 	if (Total >= ShakeThreshold)
 	{

@@ -9,7 +9,7 @@ ADPPuzzleKey::ADPPuzzleKey()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
-	// Esfera de interacción como root: solo overlap con Pawn
+	// Interaction sphere as root: overlap-only with Pawn
 	InteractionSphere = CreateDefaultSubobject<USphereComponent>(TEXT("InteractionSphere"));
 	InteractionSphere->InitSphereRadius(100.f);
 	InteractionSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
@@ -20,7 +20,7 @@ ADPPuzzleKey::ADPPuzzleKey()
 	InteractionSphere->SetGenerateOverlapEvents(true);
 	RootComponent = InteractionSphere;
 
-	// Mesh visual (cubo 30cm de lado)
+	// Visual mesh (30cm cube)
 	KeyMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("KeyMesh"));
 	KeyMesh->SetupAttachment(RootComponent);
 	KeyMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -32,7 +32,7 @@ ADPPuzzleKey::ADPPuzzleKey()
 	}
 	KeyMesh->SetRelativeScale3D(FVector(0.3f, 0.3f, 0.3f));
 
-	// Estado inicial: oculto y sin collision hasta que el subsystem nos active
+	// Initial state: hidden and with no collision until the subsystem activates us
 	SetActorHiddenInGame(true);
 	SetActorEnableCollision(false);
 }
@@ -45,7 +45,7 @@ void ADPPuzzleKey::BeginPlay()
 	{
 		PuzzleState->OnBallReachedGoal.AddDynamic(this, &ADPPuzzleKey::OnBallReachedGoalHandler);
 
-		// Defensivo: si el evento ya se disparó antes de que esta llave existiera, activarla directamente
+		// Defensive: if the event already fired before this key existed, activate it directly
 		if (PuzzleState->bBallReachedGoal)
 		{
 			ActivateKey();
@@ -72,7 +72,7 @@ void ADPPuzzleKey::ActivateKey()
 
 void ADPPuzzleKey::Interact(AActor* InteractingActor)
 {
-	// No se puede recoger una llave que aún no se ha activado
+	// You can't pick up a key that hasn't been activated yet
 	if (!bIsActive)
 	{
 		return;

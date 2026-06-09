@@ -13,7 +13,7 @@ class PROTODUNGEONSW2_API UDPBTTask_AttackTarget : public UBTTaskNode
 public:
 	UDPBTTask_AttackTarget();
 
-	// Key del BB que contiene el target a atacar (Object: AActor)
+	// BB key holding the target to attack (Object: AActor)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Blackboard")
 	FBlackboardKeySelector TargetActorKey;
 

@@ -16,7 +16,7 @@ void UDPPuzzleStateSubsystem::Deinitialize()
 
 void UDPPuzzleStateSubsystem::NotifyBallReachedGoal()
 {
-	// Evitar doble disparo si el trigger se activa más de una vez
+	// Avoid double firing if the trigger activates more than once
 	if (bBallReachedGoal)
 	{
 		return;

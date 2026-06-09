@@ -15,36 +15,36 @@ class PROTODUNGEONSW2_API ADPPuzzleBall : public APawn
 public:
 	ADPPuzzleBall();
 
-	// Tunables expuestos en editor para iteración.
+	// Tunables exposed in the editor for iteration.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Physics")
-	float Acceleration = 980.0f;  // Aceleración base, equivalente a "gravedad" cuando tilt = max.
+	float Acceleration = 980.0f;  // Base acceleration, equivalent to "gravity" when tilt = max.
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Physics")
-	float MaxSpeed = 500.0f;  // Velocidad máxima de la bola.
+	float MaxSpeed = 500.0f;  // Maximum ball speed.
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Physics")
-	float Friction = 0.95f;  // Factor multiplicador de velocidad por segundo (1.0 = sin fricción).
+	float Friction = 0.95f;  // Per-second velocity multiplier (1.0 = no friction).
 
-	// Vector de tilt actual (X = pitch del dispositivo, Y = roll). Lo asignaremos desde fuera.
+	// Current tilt vector (X = device pitch, Y = roll). Assigned from outside.
 	UPROPERTY(BlueprintReadWrite, Category = "Physics")
 	FVector2D CurrentTilt;
 
 	// Lifecycle.
 	virtual void Tick(float DeltaTime) override;
 
-	// Para que el GameMode pueda posicionar la bola al spawnear.
+	// So the GameMode can position the ball on spawn.
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
 protected:
-	// Mesh visible de la bola (esfera).
+	// Visible ball mesh (sphere).
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UStaticMeshComponent> BallMesh;
 
-	// Collision (esférica) que actúa como root.
+	// Sphere collision that acts as root.
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<USphereComponent> CollisionSphere;
 
-	// Velocidad actual de la bola (mundo).
+	// Current ball velocity (world space).
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Physics")
 	FVector CurrentVelocity;
 

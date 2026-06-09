@@ -12,7 +12,7 @@
 
 UDPCombatComponent::UDPCombatComponent()
 {
-	// De momento no necesita tick
+	// No tick needed for now
 	PrimaryComponentTick.bCanEverTick = false;
 
 	CurrentAttackType = EDPAttackType::None;
@@ -38,7 +38,7 @@ void UDPCombatComponent::TryBasicAttack()
 
 	if (BasicAttackMontage)
 	{
-		// Flujo con animación: reproducir montage y esperar al notify para aplicar daño
+		// Flow with animation: play the montage and wait for the notify to apply damage
 		ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
 		if (OwnerCharacter)
 		{
@@ -48,7 +48,7 @@ void UDPCombatComponent::TryBasicAttack()
 	}
 	else
 	{
-		// Flujo legacy (sin montage, p.ej. enemigos): daño inmediato
+		// Legacy flow (no montage, e.g. enemies): instant damage
 		PerformAttack(BasicAttackDamage, BasicAttackRange);
 	}
 }
@@ -73,7 +73,7 @@ void UDPCombatComponent::TrySpecialAttack()
 
 	if (SpecialAttackMontage)
 	{
-		// Flujo con animación: reproducir montage y esperar al notify para aplicar daño
+		// Flow with animation: play the montage and wait for the notify to apply damage
 		ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
 		if (OwnerCharacter)
 		{
@@ -83,7 +83,7 @@ void UDPCombatComponent::TrySpecialAttack()
 	}
 	else
 	{
-		// Flujo legacy (sin montage): daño inmediato
+		// Legacy flow (no montage): instant damage
 		PerformAttack(SpecialAttackDamage, SpecialAttackRange);
 	}
 }
@@ -99,7 +99,7 @@ void UDPCombatComponent::OnDamageNotify()
 		PerformAttack(SpecialAttackDamage, SpecialAttackRange);
 	}
 
-	// Reset state — el siguiente ataque pondrá el tipo correcto
+	// Reset state — the next attack will set the correct type
 	CurrentAttackType = EDPAttackType::None;
 }
 
@@ -113,13 +113,13 @@ bool UDPCombatComponent::CanBasicAttack() const
 
 	const float Now = World->GetTimeSeconds();
 
-	// Bloqueado por su propio cooldown
+	// Blocked by its own cooldown
 	if (Now - LastBasicAttackTime < BasicAttackCooldown)
 	{
 		return false;
 	}
 
-	// Bloqueado mientras el especial sigue activo (lockout global)
+	// Blocked while the special is still active (global lockout)
 	if (Now - LastSpecialAttackTime < SpecialAttackCooldown)
 	{
 		return false;
@@ -148,7 +148,7 @@ void UDPCombatComponent::PerformAttack(float Damage, float Range)
 		return;
 	}
 
-	// Necesitamos un Pawn para tener forward vector y controller para el daño
+	// We need a Pawn to have a forward vector and a controller for damage
 	APawn* OwnerPawn = Cast<APawn>(OwnerActor);
 	if (!OwnerPawn)
 	{
@@ -161,16 +161,16 @@ void UDPCombatComponent::PerformAttack(float Damage, float Range)
 		return;
 	}
 
-	// Centro de la esfera: delante del owner, a distancia Range
+	// Sphere center: in front of the owner, at distance Range
 	const FVector OwnerLocation = OwnerPawn->GetActorLocation();
 	const FVector OwnerForward  = OwnerPawn->GetActorForwardVector();
 	const FVector AttackLocation = OwnerLocation + (OwnerForward * Range);
 
-	// Filtrar por canal de objeto Pawn (queremos solo personajes)
+	// Filter by Pawn object channel (we only want characters)
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
 	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn));
 
-	// Ignorar al propio owner para evitar auto-daño
+	// Ignore the owner itself to avoid self-damage
 	TArray<AActor*> ActorsToIgnore;
 	ActorsToIgnore.Add(OwnerActor);
 
@@ -190,14 +190,14 @@ void UDPCombatComponent::PerformAttack(float Damage, float Range)
 	int32 HitCount = 0;
 	for (AActor* Target : OverlappedActors)
 	{
-		// Solo dañamos personajes del proyecto (DPCharacterBase y derivados)
+		// Only damage project characters (DPCharacterBase and derivatives)
 		ADPCharacterBase* Character = Cast<ADPCharacterBase>(Target);
 		if (Character && Character != OwnerActor)
 		{
 			UGameplayStatics::ApplyDamage(Character, Damage, OwnerController, OwnerActor, nullptr);
 			++HitCount;
 
-			// Feedback de impacto en la posición del objetivo (una vez por target)
+			// Hit feedback at the target's location (once per target)
 			if (HitImpactSound)
 			{
 				UGameplayStatics::PlaySoundAtLocation(World, HitImpactSound, Character->GetActorLocation());
@@ -205,7 +205,7 @@ void UDPCombatComponent::PerformAttack(float Damage, float Range)
 		}
 	}
 
-	// Visualización de la esfera de detección
+	// Detection sphere visualization
 	if (bDrawDebugAttacks)
 	{
 		DrawDebugSphere(World, AttackLocation, AttackRadius, 12, FColor::Red, false, 1.f);

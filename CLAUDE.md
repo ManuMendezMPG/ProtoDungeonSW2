@@ -1,146 +1,146 @@
-\# ProtoDungeonSW2 — Contexto para Claude
+\# ProtoDungeonSW2 — Context for Claude
 
 
 
-\## Proyecto
+\## Project
 
-Dungeon crawler isométrico, prototipo de 2 niveles, target Nintendo Switch 2.
+Isometric dungeon crawler, 2-level prototype, target Nintendo Switch 2.
 
-Desarrollado en PC (Windows) con Unreal Engine 5.7 compilado desde source.
+Developed on PC (Windows) with Unreal Engine 5.7 built from source.
 
 
 
-\## Niveles planificados
+\## Planned levels
 
-\- \*\*Nivel 1 (L\_Combat):\*\* combate con movimiento por stick, ataque básico (botón) y 
+\- \*\*Level 1 (L\_Combat):\*\* combat with stick movement, basic attack (button) and 
 
-&#x20; ataque especial agitando JoyCon (simulado con click de ratón en PC).
+&#x20; special attack by shaking the JoyCon (simulated with a mouse click on PC).
 
-\- \*\*Nivel 2 (L\_Puzzle):\*\* puzzle que conmuta modo dock (cámara isométrica) y modo 
+\- \*\*Level 2 (L\_Puzzle):\*\* puzzle that toggles dock mode (isometric camera) and 
 
-&#x20; portátil (cámara cenital + giroscopio que mueve una bola por un laberinto).
+&#x20; handheld mode (top-down camera + gyroscope that moves a ball through a maze).
 
 
 
 \## Engine
 
-\- UE 5.7 source build en C:\\UE57 (junction).
+\- UE 5.7 source build at C:\\UE57 (junction).
 
-\- NO modificar código del engine salvo que se pida explícitamente.
+\- Do NOT modify engine code unless explicitly requested.
 
-\- Build config habitual: Development Editor | Win64.
-
-
-
-\## Proyecto en disco
-
-\- Ruta: C:\\dev\\ProtoDungeonSW2
-
-\- Nombre del módulo: ProtoDungeonSW2
-
-\- Macro API del módulo: PROTODUNGEONSW2\_API
+\- Standard build config: Development Editor | Win64.
 
 
 
-\## Repositorio
+\## Project on disk
+
+\- Path: C:\\dev\\ProtoDungeonSW2
+
+\- Module name: ProtoDungeonSW2
+
+\- Module API macro: PROTODUNGEONSW2\_API
+
+
+
+\## Repository
 
 \- GitHub (https://github.com/ManuMendezMPG/ProtoDungeonSW2), main.
 
-\- Git LFS configurado para .uasset, .umap y binarios habituales.
+\- Git LFS configured for .uasset, .umap, and the usual binaries.
 
-\- Ignorar: Binaries/, Intermediate/, DerivedDataCache/, Saved/, .vs/
-
-
-
-\## Convenciones de código
-
-\- Prefijo de clases del proyecto: DP (ej: ADPPlayerCharacter, UDPCombatComponent).
-
-\- Prefijos estándar UE: A para Actors, U para UObjects/Components, F para structs, E para enums.
-
-\- Todos los UPROPERTY editables deben tener Category específica.
-
-\- Usar TObjectPtr<T> en lugar de T\* en miembros UObject.
-
-\- Logs con categorías propias: DECLARE\_LOG\_CATEGORY\_EXTERN + DEFINE\_LOG\_CATEGORY.
-
-\- Comentarios en español, código (identificadores, strings) en inglés.
+\- Ignore: Binaries/, Intermediate/, DerivedDataCache/, Saved/, .vs/
 
 
 
-\## Módulos
+\## Code conventions
 
-\- Módulo principal: ProtoDungeonSW2
+\- Project class prefix: DP (e.g.: ADPPlayerCharacter, UDPCombatComponent).
 
-\- Dependencias actuales: Core, CoreUObject, Engine, InputCore
+\- Standard UE prefixes: A for Actors, U for UObjects/Components, F for structs, E for enums.
 
-\- Dependencias que añadiremos según necesidad: EnhancedInput, PhysicsCore, UMG
+\- Every editable UPROPERTY must have a specific Category.
+
+\- Use TObjectPtr<T> instead of T\* for UObject members.
+
+\- Logs with their own categories: DECLARE\_LOG\_CATEGORY\_EXTERN + DEFINE\_LOG\_CATEGORY.
+
+\- Comments and code (identifiers, strings) in English.
+
+
+
+\## Modules
+
+\- Main module: ProtoDungeonSW2
+
+\- Current dependencies: Core, CoreUObject, Engine, InputCore
+
+\- Dependencies we'll add as needed: EnhancedInput, PhysicsCore, UMG
 
 
 
 \## Input
 
-\- Usamos Enhanced Input (NO el sistema viejo).
+\- We use Enhanced Input (NOT the old system).
 
-\- IMCs separados por contexto (Combat, Puzzle) y uno global (Default).
-
-
-
-\## Plataforma
-
-\- Dock/portátil y giroscopio se simulan en PC para desarrollo:
-
-&#x20; - Toggle dock/portátil: tecla (por definir).
-
-&#x20; - Giroscopio: ratón o WASD alternativo.
-
-\- Abstracción vía Subsystems para que el código gameplay no sepa de plataforma.
-
-\- El SDK de Switch 2 está en C:\\UE57\\Engine\\Platforms\\Switch2 (presente pero no activo en desarrollo PC).
+\- IMCs split by context (Combat, Puzzle) plus one global (Default).
 
 
 
-\## Criterios de aceptación de código generado
+\## Platform
 
-\- Compila sin warnings en Development Editor.
+\- Dock/handheld and gyroscope are simulated on PC for development:
 
-\- Incluye headers correctos y GENERATED\_BODY().
+&#x20; - Toggle dock/handheld: key (TBD).
 
-\- UPROPERTY/UFUNCTION con specifiers correctos (EditDefaultsOnly vs EditAnywhere, 
+&#x20; - Gyroscope: mouse or WASD alternative.
+
+\- Abstraction via Subsystems so gameplay code is platform-agnostic.
+
+\- The Switch 2 SDK lives at C:\\UE57\\Engine\\Platforms\\Switch2 (present but not active in PC development).
+
+
+
+\## Acceptance criteria for generated code
+
+\- Compiles without warnings in Development Editor.
+
+\- Correct headers and GENERATED\_BODY() included.
+
+\- UPROPERTY/UFUNCTION with correct specifiers (EditDefaultsOnly vs EditAnywhere, 
 
 &#x20; BlueprintReadOnly vs BlueprintReadWrite, etc.).
 
-\- Separación clara entre header (.h) y implementación (.cpp).
+\- Clear separation between header (.h) and implementation (.cpp).
 
-\- Forward declarations en headers cuando sea posible para minimizar includes.
-
-
-
-\## Workflow con IA
-
-\- Para clases nuevas: pedir header + cpp juntos, incluir Build.cs si cambia.
-
-\- Para cambios multi-archivo: usar Claude Code; para dudas conceptuales: chat.
-
-\- Commits frecuentes y pequeños cuando algo compila.
+\- Forward declarations in headers where possible to minimize includes.
 
 
-## Includes en UE (regla verificada empíricamente)
 
-Los includes dentro del módulo usan rutas relativas al archivo fuente:
+\## AI workflow
 
-- Archivo en MISMA carpeta: #include "Archivo.h"
-- Archivo en carpeta DISTINTA: usar ../ para subir y bajar
-  Ejemplo: desde GameModes/Algo.cpp incluir Characters/Otro.h:
-  #include "../Characters/Otro.h"
+\- For new classes: request header + cpp together, include Build.cs if it changes.
 
-Para módulos externos (engine), los paths son relativos a la raíz pública 
-de ese módulo, no requieren ../:
+\- For multi-file changes: use Claude Code; for conceptual questions: chat.
+
+\- Frequent, small commits whenever something compiles.
+
+
+## Includes in UE (empirically verified rule)
+
+Includes within the module use paths relative to the source file:
+
+- File in the SAME folder: #include "File.h"
+- File in a DIFFERENT folder: use ../ to go up and down
+  Example: from GameModes/Something.cpp include Characters/Other.h:
+  #include "../Characters/Other.h"
+
+For external modules (engine), paths are relative to that module's public 
+root, and do not need ../:
   #include "GameFramework/Character.h"
   #include "Camera/CameraComponent.h"
 
-Nota: Si en el futuro queremos paths "absolutos" desde raíz del módulo sin 
-../ relativos, se puede añadir PublicIncludePaths en ProtoDungeonSW2.Build.cs.
+Note: If in the future we want "absolute" paths from the module root without 
+relative ../, we can add PublicIncludePaths in ProtoDungeonSW2.Build.cs.
 
 ## Naming Conventions
 
@@ -166,45 +166,45 @@ Example - bad:
 Example - good:
     virtual void Interact(AActor* InteractingActor);
 
-## Patrón: actor con animación one-shot que cambia de estado
+## Pattern: actor with a one-shot animation that changes state
 
-Cuando un actor del puzzle (o cualquier otro sistema) necesita 
-reproducir una animación que lo lleva de un estado A a un estado B 
-persistente — por ejemplo cofre cerrado → abierto, puerta cerrada → 
-abierta —, seguir este patrón.
+When a puzzle actor (or any other system) needs to play 
+an animation that takes it from state A to a persistent 
+state B — for example chest closed → open, door closed → 
+open —, follow this pattern.
 
-Referencias en el código: `ADPPuzzleChest`, `ADPPuzzleDoor`.
+Code references: `ADPPuzzleChest`, `ADPPuzzleDoor`.
 
-### Estructura
+### Structure
 
-1. **RootComponent**: `USkeletalMeshComponent`, no `UStaticMeshComponent`. 
-   El skeletal es necesario para reproducir animaciones aunque el actor 
-   no necesite AnimBP.
+1. **RootComponent**: `USkeletalMeshComponent`, not `UStaticMeshComponent`. 
+   The skeletal is required to play animations even when the actor 
+   doesn't need an AnimBP.
 
-2. **Animación**: `UAnimSequence*` asignado vía `UPROPERTY EditAnywhere`. 
-   No usar `UAnimMontage` para este caso: los montages devuelven el slot 
-   a la bind pose cuando terminan, lo cual revierte visualmente el 
-   estado.
+2. **Animation**: `UAnimSequence*` assigned via `UPROPERTY EditAnywhere`. 
+   Don't use `UAnimMontage` for this case: montages return the slot 
+   to bind pose when they end, which visually reverts the 
+   state.
 
-3. **AnimBP del SkeletalMesh**: no se necesita. `PlayAnimation()` pone 
-   el `SkeletalMeshComponent` en modo `AnimationSingleNode` y bypasea 
-   el AnimGraph.
+3. **SkeletalMesh AnimBP**: not needed. `PlayAnimation()` puts 
+   the `SkeletalMeshComponent` into `AnimationSingleNode` mode and bypasses 
+   the AnimGraph.
 
-4. **Bool de estado**: `bool bIsOpen` / `bool bHasBeenOpened`, 
-   `UPROPERTY BlueprintReadOnly`. Es la fuente de verdad para "ya se 
-   activó", no la collision ni la visibilidad.
+4. **State bool**: `bool bIsOpen` / `bool bHasBeenOpened`, 
+   `UPROPERTY BlueprintReadOnly`. This is the source of truth for "already 
+   activated", not collision or visibility.
 
-5. **FTimerHandle**: privado, para detectar el fin de la animación. 
-   `PlayAnimation` no dispara `OnMontageEnded` (no usa montages); 
-   usamos un timer manual con la duración real de la animación.
+5. **FTimerHandle**: private, to detect the end of the animation. 
+   `PlayAnimation` does not fire `OnMontageEnded` (it doesn't use montages); 
+   we use a manual timer with the animation's actual duration.
 
-### Flujo de Interact()
+### Interact() flow
 
 ```cpp
 void AMyActor::Interact(AActor* InteractingActor)
 {
-    if (bIsOpen) return;       // Idempotencia: no re-activar
-    bIsOpen = true;            // Marcar PRIMERO para bloquear re-entradas
+    if (bIsOpen) return;       // Idempotency: don't re-activate
+    bIsOpen = true;            // Mark FIRST to block re-entry
 
     if (OpenAnimation && Mesh)
     {
@@ -217,50 +217,50 @@ void AMyActor::Interact(AActor* InteractingActor)
     }
     else
     {
-        // Fallback: si falta la animación o el mesh, no queremos que 
-        // la mecánica se quede colgada. Llamamos al handler de fin de 
-        // animación directamente.
+        // Fallback: if the animation or the mesh is missing, we don't 
+        // want the mechanic to get stuck. Call the animation-end handler 
+        // directly.
         OnAnimationEnded();
     }
 }
 ```
 
-### Handler del fin de animación
+### Animation-end handler
 
-Todo el efecto **persistente** (cambio de collision, transición de 
-nivel, set de flag en subsystem, broadcast de mensaje, etc.) va aquí, 
-**nunca dentro de Interact() directamente**. Así el feedback visual 
-y la mecánica están sincronizados.
+All **persistent** effects (collision changes, level transitions, 
+setting a flag on a subsystem, broadcasting a message, etc.) go here, 
+**never directly inside Interact()**. This way the visual feedback 
+and the mechanic stay synchronized.
 
 ```cpp
 void AMyActor::OnAnimationEnded()
 {
-    // Efectos persistentes: collision toggle, transición, subsystem, 
-    // mensaje HUD, etc.
+    // Persistent effects: collision toggle, transition, subsystem, 
+    // HUD message, etc.
 }
 ```
 
-### Reglas de collision
+### Collision rules
 
-- **Constructor**: configurar el mesh como Block contra Pawn 
-  (`WorldStatic` u `WorldDynamic` según corresponda) para que el 
-  player no atraviese el actor mientras está en estado A.
-- **No llamar `SetActorEnableCollision(false)` en Interact()**: el 
-  bool de estado ya previene re-interacción. Desactivar toda la 
-  collision rompe el bloqueo físico.
-- **Si el estado B requiere que el player atraviese el actor** 
-  (caso de la puerta): hacer `Mesh->SetCollisionEnabled(NoCollision)` 
-  en `OnAnimationEnded()`, no antes.
-- **Si el actor debe estar oculto antes de un evento de revelación** 
-  (caso del cofre con `OnBallReachedGoal`): en `BeginPlay()` hacer 
-  `SetActorHiddenInGame(true)` + `SetActorEnableCollision(false)`. En 
-  el handler del delegate de revelación, volver a activar ambos.
+- **Constructor**: set the mesh to Block against Pawn 
+  (`WorldStatic` or `WorldDynamic` as appropriate) so the 
+  player can't pass through the actor while it's in state A.
+- **Don't call `SetActorEnableCollision(false)` in Interact()**: the 
+  state bool already prevents re-interaction. Disabling all 
+  collision breaks physical blocking.
+- **If state B requires the player to be able to pass through the actor** 
+  (the door case): do `Mesh->SetCollisionEnabled(NoCollision)` 
+  in `OnAnimationEnded()`, not before.
+- **If the actor must be hidden until a reveal event** 
+  (the chest with `OnBallReachedGoal` case): in `BeginPlay()` do 
+  `SetActorHiddenInGame(true)` + `SetActorEnableCollision(false)`. In 
+  the reveal delegate handler, re-enable both.
 
-### Conexión con UDPMessageSubsystem
+### Connection to UDPMessageSubsystem
 
-Si el actor debe mostrar un mensaje al jugador (al abrirse, al fallar 
-una condición, etc.), pedirlo al subsystem desde Interact() o desde 
-OnAnimationEnded() según el caso:
+If the actor needs to show a message to the player (on opening, on failing 
+a condition, etc.), request it from the subsystem in Interact() or in 
+OnAnimationEnded() depending on the case:
 
 ```cpp
 if (UGameInstance* GI = GetGameInstance())
@@ -273,41 +273,41 @@ if (UGameInstance* GI = GetGameInstance())
 }
 ```
 
-No usar `GEngine->AddOnScreenDebugMessage` en lógica de gameplay — 
-ese canal es solo para debug temporal.
+Don't use `GEngine->AddOnScreenDebugMessage` in gameplay logic — 
+that channel is for temporary debug only.
 
-### Variante para Character con AnimBP
+### Variant for a Character with AnimBP
 
-Cuando el actor es un ACharacter con AnimBP completo (state machine 
-locomotion + montages) pero también tiene una animación one-shot que 
-debe persistir (muerte del player, muerte de enemigos), aplicar el 
-mismo patrón:
+When the actor is an ACharacter with a full AnimBP (state machine 
+locomotion + montages) but also has a one-shot animation that 
+must persist (player death, enemy death), apply the 
+same pattern:
 
-- La animación va como UAnimSequence (no UAnimMontage). PlayAnimation 
-  bypasea el AnimBP y mantiene el último frame.
-- Se asume que tras esta animación el actor no necesita volver al 
-  AnimBP. Si tuviera que reanimarse, habría que restaurar el modo 
-  con SetAnimationMode(EAnimationMode::AnimationBlueprint) + reasignar 
-  el AnimClass.
+- The animation goes as a UAnimSequence (not UAnimMontage). PlayAnimation 
+  bypasses the AnimBP and holds the last frame.
+- We assume the actor doesn't need to return to the AnimBP after this 
+  animation. If it had to be reanimated, you'd restore the mode 
+  with SetAnimationMode(EAnimationMode::AnimationBlueprint) and reassign 
+  the AnimClass.
 
-Referencia: ADPCharacterBase::OnDeath() reproduce DeathAnimation 
-mediante GetMesh()->PlayAnimation(DeathAnimation, false).
+Reference: ADPCharacterBase::OnDeath() plays DeathAnimation 
+via GetMesh()->PlayAnimation(DeathAnimation, false).
 
-### Combinación con UI tras la animación
+### Combining with UI after the animation
 
-Cuando la animación culmina con UI (Game Over, victoria, mensaje 
-modal):
+When the animation culminates in UI (Game Over, victory, modal 
+message):
 
-1. Programar el widget con FTimerHandle con Delay = 
-   AnimSequence->GetPlayLength() para sincronizar.
-2. Al mostrar el widget: SetInputModeUIOnly + SetShowMouseCursor(true) 
+1. Schedule the widget with an FTimerHandle and Delay = 
+   AnimSequence->GetPlayLength() to synchronize.
+2. When showing the widget: SetInputModeUIOnly + SetShowMouseCursor(true) 
    + SetGamePaused(true).
-3. Al cerrar el widget (botón Retry, Continue, etc.): SetGamePaused(false) 
-   + RemoveFromParent + acción siguiente.
-4. En BeginPlay del Character spawneado tras un reload defensivamente: 
+3. When closing the widget (Retry, Continue, etc. button): SetGamePaused(false) 
+   + RemoveFromParent + next action.
+4. Defensively, in BeginPlay of the Character spawned after a reload: 
    SetInputModeGameOnly + SetShowMouseCursor(false) + EnableInput(PC). 
-   El viewport del editor (PIE) puede mantener el InputMode anterior y 
-   bloquear input al nuevo player.
+   The editor viewport (PIE) can retain the previous InputMode and 
+   block input to the new player.
 
-Referencia: ADPPlayerCharacter::OnDeath() / ShowGameOverScreen() / 
+Reference: ADPPlayerCharacter::OnDeath() / ShowGameOverScreen() / 
 BeginPlay().

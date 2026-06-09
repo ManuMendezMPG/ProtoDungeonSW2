@@ -19,22 +19,22 @@ void ADPCharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Inicializar vida actual al máximo al comenzar el juego
+	// Initialize current health to max when the game starts
 	CurrentHealth = MaxHealth;
 
-	// Notificar el valor inicial a cualquier listener ya suscrito (p.ej. widget de UI)
+	// Notify the initial value to any already-subscribed listener (e.g. UI widget)
 	BroadcastHealthChange();
 }
 
 float ADPCharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	// Si ya está muerto, ignorar daño adicional
+	// If already dead, ignore additional damage
 	if (bIsDead)
 	{
 		return 0.f;
 	}
 
-	// Llamar a Super para que UE module el daño según DamageType, multipliers, etc.
+	// Call Super so UE modulates the damage based on DamageType, multipliers, etc.
 	const float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
 	if (ActualDamage > 0.f)
@@ -50,12 +50,12 @@ float ADPCharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 
 		BroadcastHealthChange();
 
-		// Hit reaction solo si sobrevive el golpe (la muerte gestiona su propia animación)
+		// Hit reaction only if the character survives the hit (death handles its own animation)
 		if (CurrentHealth > 0.f)
 		{
 			PlayHitReaction(DamageCauser);
 
-			// Grunt de daño no letal en la posición del actor (3D)
+			// Non-lethal damage grunt at the actor's location (3D)
 			if (DamageSound)
 			{
 				UGameplayStatics::PlaySoundAtLocation(GetWorld(), DamageSound, GetActorLocation());
@@ -81,18 +81,18 @@ float ADPCharacterBase::GetHealthPercent() const
 
 void ADPCharacterBase::OnDeath()
 {
-	// Reproducir animación de muerte si está asignada. PlayAnimation con
-	// Loop=false mantiene la pose en el último frame; no se vuelve al
-	// AnimBP (no hace falta — el personaje está muerto)
+	// Play the death animation if assigned. PlayAnimation with
+	// Loop=false keeps the pose at the last frame; we don't return to
+	// the AnimBP (no need — the character is dead)
 	if (DeathAnimation && GetMesh())
 	{
 		GetMesh()->PlayAnimation(DeathAnimation, false);
 	}
 
-	// Detener cualquier montage activo (ej. ataque a medio camino).
-	// Esto evita que notifies pendientes como DamageMoment disparen daño
-	// post-muerte. Usamos un BlendOut corto pero no instantáneo para que
-	// la transición a la pose de DeathAnimation no se vea brusca
+	// Stop any active montage (e.g. an attack mid-flight).
+	// This prevents pending notifies like DamageMoment from triggering
+	// post-death damage. We use a short but non-instant BlendOut so the
+	// transition to the DeathAnimation pose doesn't look abrupt
 	if (USkeletalMeshComponent* MeshComp = GetMesh())
 	{
 		if (UAnimInstance* AnimInstance = MeshComp->GetAnimInstance())
@@ -107,19 +107,19 @@ void ADPCharacterBase::OnDeath()
 		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, Msg);
 	}
 
-	// Desactivar colisión para no estorbar a otros actores
+	// Disable collision so the corpse doesn't get in the way of other actors
 	SetActorEnableCollision(false);
 
-	// Detener movimiento
+	// Stop movement
 	if (UCharacterMovementComponent* Movement = GetCharacterMovement())
 	{
 		Movement->DisableMovement();
 	}
 
-	// Si el actor es controlado por un AIController, detener su Behavior
-	// Tree y desposeer el pawn. Sin esto el AI sigue evaluando el BT
-	// durante el delay de transición y puede ejecutar acciones
-	// (perseguir, atacar) sobre un cadáver
+	// If the actor is controlled by an AIController, stop its Behavior
+	// Tree and unpossess the pawn. Without this the AI keeps evaluating
+	// the BT during the transition delay and can execute actions
+	// (chase, attack) on a corpse
 	if (AAIController* AIController = Cast<AAIController>(GetController()))
 	{
 		if (UBrainComponent* Brain = AIController->GetBrainComponent())
@@ -128,7 +128,7 @@ void ADPCharacterBase::OnDeath()
 		}
 	}
 
-	// Disparar transición de nivel si este character es el "trigger" del nivel (ej: enemigo final del L_Combat)
+	// Trigger the level transition if this character is the level's "trigger" (e.g. the final enemy of L_Combat)
 	if (bTriggersLevelTransitionOnDeath && NextLevelName != NAME_None)
 	{
 		if (UDPLevelTransitionSubsystem* TransitionSubsystem = GetGameInstance()->GetSubsystem<UDPLevelTransitionSubsystem>())
@@ -145,16 +145,16 @@ void ADPCharacterBase::BroadcastHealthChange()
 
 void ADPCharacterBase::PlayHitReaction(AActor* DamageCauser)
 {
-	// Default a Front: si no hay causer (autodaño, fallthrough, etc.) o no se puede determinar dirección
+	// Default to Front: if there is no causer (self-damage, fallthrough, etc.) or direction can't be determined
 	UAnimMontage* MontageToPlay = HitReactFrontMontage;
 
 	if (DamageCauser != nullptr)
 	{
-		// Vector desde el defensor al atacante, normalizado (GetSafeNormal evita div/0 si coinciden)
+		// Vector from defender to attacker, normalized (GetSafeNormal avoids div/0 if they coincide)
 		const FVector ToAttacker = (DamageCauser->GetActorLocation() - GetActorLocation()).GetSafeNormal();
 		const FVector Forward    = GetActorForwardVector();
 
-		// Dot > 0 => atacante delante; Dot < 0 => detrás. Umbral en 90°.
+		// Dot > 0 => attacker in front; Dot < 0 => behind. Threshold at 90°.
 		const float DotProduct = FVector::DotProduct(Forward, ToAttacker);
 
 		if (DotProduct < 0.f && HitReactBackMontage != nullptr)
@@ -163,8 +163,8 @@ void ADPCharacterBase::PlayHitReaction(AActor* DamageCauser)
 		}
 	}
 
-	// Detener cualquier montage en curso para que un nuevo PlayAnimMontage no sea ignorado
-	// (PlayAnimMontage no reemplaza un montage que aún se está reproduciendo)
+	// Stop any montage in progress so a new PlayAnimMontage isn't ignored
+	// (PlayAnimMontage does not replace a montage that is still playing)
 	if (USkeletalMeshComponent* MeshComp = GetMesh())
 	{
 		if (UAnimInstance* AnimInstance = MeshComp->GetAnimInstance())

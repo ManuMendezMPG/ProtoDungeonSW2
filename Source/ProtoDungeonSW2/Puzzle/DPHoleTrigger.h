@@ -19,7 +19,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UBoxComponent> TriggerBox;
 
-	// Callback cuando algo entra en el trigger.
+	// Callback when something enters the trigger.
 	UFUNCTION()
 	void OnTriggerBeginOverlap(
 		UPrimitiveComponent* OverlappedComp,

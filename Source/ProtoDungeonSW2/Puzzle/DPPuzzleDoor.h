@@ -16,56 +16,56 @@ class PROTODUNGEONSW2_API ADPPuzzleDoor : public ADPInteractableBase
 public:
 	ADPPuzzleDoor();
 
-	// Estado: si la puerta está abierta.
+	// State: whether the door is open.
 	UPROPERTY(BlueprintReadOnly, Category = "Puzzle")
 	bool bIsOpen = false;
 
-	// Si true, al abrirse esta puerta solicita al UDPLevelTransitionSubsystem cargar NextLevelName.
-	// Pensado para puertas de fin de nivel; el resto de puertas lo dejan en false.
+	// If true, when this door opens it asks UDPLevelTransitionSubsystem to load NextLevelName.
+	// Intended for end-of-level doors; other doors leave this as false.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Transition")
 	bool bTriggersLevelTransitionOnOpen = false;
 
-	// Mapa destino al abrirse cuando bTriggersLevelTransitionOnOpen = true.
+	// Destination map on open when bTriggersLevelTransitionOnOpen = true.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Transition")
 	FName NextLevelName = NAME_None;
 
-	// Delay antes de iniciar el fade tras abrirse la puerta (segundos).
+	// Delay before starting the fade after the door opens (seconds).
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Transition")
 	float TransitionDelay = 0.5f;
 
-	// Mensaje que se solicita mostrar vía UDPMessageSubsystem al intentar abrir la puerta sin llave.
+	// Message requested for display via UDPMessageSubsystem when trying to open the door without a key.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Puzzle Door")
 	FString NoKeyMessage = TEXT("You need a key. Maybe you'll find it taking the bull by the joycons... I mean, horns.");
 
-	// Duración del mensaje "sin llave" on-screen.
+	// Duration of the "no key" on-screen message.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Puzzle Door")
 	float NoKeyMessageDuration = 6.0f;
 
-	// Animación que se reproduce al abrirse la puerta (gateopen de Kenney, asignada en el BP).
-	// PlayAnimation con Loop=false deja la puerta en el último frame (abierta) sin volver al bind pose.
+	// Animation played when the door opens (Kenney's gateopen, assigned in the BP).
+	// PlayAnimation with Loop=false leaves the door at the last frame (open) without returning to bind pose.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Puzzle Door")
 	TObjectPtr<UAnimSequence> OpenAnimation;
 
 	virtual void Interact(AActor* InteractingActor) override;
 
 protected:
-	// Skeletal mesh de la puerta (gate de Kenney, asignado en el BP). Sirve como root component.
+	// Door skeletal mesh (Kenney's gate, assigned in the BP). Acts as the root component.
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<USkeletalMeshComponent> DoorMesh;
 
-	// Esfera de overlap para detectar al player.
+	// Overlap sphere to detect the player.
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<USphereComponent> InteractionSphere;
 
-	// Marca la puerta como abierta y reproduce la animación. La colisión y la transición
-	// se gestionan en OnOpenAnimationEnded al terminar la animación.
+	// Marks the door as open and plays the animation. Collision and transition
+	// are handled in OnOpenAnimationEnded when the animation finishes.
 	void OpenDoor();
 
-	// Callback al terminar OpenAnimation (disparado por timer). Desactiva colisión y dispara
-	// la transición de nivel si la puerta es la salida del nivel.
+	// Callback when OpenAnimation finishes (fired by timer). Disables collision and triggers
+	// the level transition if the door is the level exit.
 	void OnOpenAnimationEnded();
 
 private:
-	// Timer que cuenta la duración de OpenAnimation; PlayAnimation no emite OnMontageEnded.
+	// Timer that counts OpenAnimation's duration; PlayAnimation does not fire OnMontageEnded.
 	FTimerHandle OpenAnimTimerHandle;
 };

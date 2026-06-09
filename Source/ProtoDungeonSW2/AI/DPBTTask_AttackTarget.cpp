@@ -10,7 +10,7 @@ UDPBTTask_AttackTarget::UDPBTTask_AttackTarget()
 {
 	NodeName = TEXT("Attack Target");
 
-	// Filtro de tipo en el editor: TargetActorKey solo acepta keys Object/AActor
+	// Type filter in the editor: TargetActorKey only accepts Object/AActor keys
 	TargetActorKey.AddObjectFilter(this, GET_MEMBER_NAME_CHECKED(UDPBTTask_AttackTarget, TargetActorKey), AActor::StaticClass());
 }
 
@@ -26,7 +26,7 @@ void UDPBTTask_AttackTarget::InitializeFromAsset(UBehaviorTree& Asset)
 
 EBTNodeResult::Type UDPBTTask_AttackTarget::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-	// Necesitamos el controller para llegar al pawn poseído
+	// We need the controller to get to the possessed pawn
 	AAIController* AIController = OwnerComp.GetAIOwner();
 	if (!AIController)
 	{
@@ -39,14 +39,14 @@ EBTNodeResult::Type UDPBTTask_AttackTarget::ExecuteTask(UBehaviorTreeComponent& 
 		return EBTNodeResult::Failed;
 	}
 
-	// CombatComponent es protected en ADPEnemyBase: lo localizamos por clase
+	// CombatComponent is protected in ADPEnemyBase: we look it up by class
 	UDPCombatComponent* CombatComp = Enemy->FindComponentByClass<UDPCombatComponent>();
 	if (!CombatComp)
 	{
 		return EBTNodeResult::Failed;
 	}
 
-	// Comprobación defensiva: debe haber un target en el blackboard
+	// Defensive check: there must be a target in the blackboard
 	UBlackboardComponent* BBComp = OwnerComp.GetBlackboardComponent();
 	if (!BBComp)
 	{
@@ -59,7 +59,7 @@ EBTNodeResult::Type UDPBTTask_AttackTarget::ExecuteTask(UBehaviorTreeComponent& 
 		return EBTNodeResult::Failed;
 	}
 
-	// Si está en cooldown, devolvemos Failed para que el árbol pueda reaccionar
+	// If on cooldown, return Failed so the tree can react
 	if (!CombatComp->CanBasicAttack())
 	{
 		return EBTNodeResult::Failed;

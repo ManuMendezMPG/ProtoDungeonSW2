@@ -10,22 +10,22 @@ class PROTODUNGEONSW2_API UDPLevelTransitionSubsystem : public UGameInstanceSubs
 	GENERATED_BODY()
 
 public:
-	// Inicia transición a un mapa con delay opcional antes del fade.
-	// DelayBeforeFade: segundos a esperar antes de iniciar el fade (útil para dar tiempo a animaciones de muerte, etc).
-	// FadeDuration: duración del fade a negro antes de cargar.
+	// Starts a transition to a map with an optional delay before the fade.
+	// DelayBeforeFade: seconds to wait before starting the fade (useful to give death animations etc time to play).
+	// FadeDuration: duration of the fade to black before loading.
 	UFUNCTION(BlueprintCallable, Category = "Transition")
 	void TransitionToLevel(FName LevelName, float DelayBeforeFade = 0.f, float FadeDuration = 0.5f);
 
 protected:
-	// Estado interno para evitar transiciones múltiples solapadas.
+	// Internal state to avoid multiple overlapping transitions.
 	bool bTransitionInProgress = false;
 
-	// Mapa destino tras el fade (almacenado durante el delay).
+	// Destination map after the fade (stored during the delay).
 	FName PendingLevelName;
 
-	// Inicia el fade y programa OpenLevel.
+	// Starts the fade and schedules OpenLevel.
 	void StartFadeAndLoad(float FadeDuration);
 
-	// Ejecuta OpenLevel al final del fade.
+	// Runs OpenLevel at the end of the fade.
 	void ExecuteOpenLevel();
 };

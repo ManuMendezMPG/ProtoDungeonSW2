@@ -44,23 +44,23 @@ void UDPLevelTransitionSubsystem::StartFadeAndLoad(float FadeDuration)
 		return;
 	}
 
-	// Fade a negro vía PlayerCameraManager
+	// Fade to black via PlayerCameraManager
 	if (APlayerController* PC = World->GetFirstPlayerController())
 	{
 		if (PC->PlayerCameraManager != nullptr)
 		{
 			PC->PlayerCameraManager->StartCameraFade(
-				0.f,                 // from alpha (transparente)
-				1.f,                 // to alpha (totalmente negro)
+				0.f,                 // from alpha (transparent)
+				1.f,                 // to alpha (fully black)
 				FadeDuration,
 				FLinearColor::Black,
 				false,               // bShouldFadeAudio
-				true                 // bHoldWhenFinished (mantener negro tras terminar)
+				true                 // bHoldWhenFinished (hold black after completion)
 			);
 		}
 	}
 
-	// Programar OpenLevel cuando termine el fade
+	// Schedule OpenLevel when the fade ends
 	FTimerHandle LoadHandle;
 	World->GetTimerManager().SetTimer(
 		LoadHandle,

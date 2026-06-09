@@ -26,46 +26,46 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
-	// Override de la muerte: añade al flujo base el bloqueo de input y el Game Over UI
-	// tras la duración de DeathAnimation (o un fallback si no hay animación asignada)
+	// Death override: adds input blocking and the Game Over UI to the base flow,
+	// after DeathAnimation's duration (or a fallback if no animation is assigned)
 	virtual void OnDeath() override;
 
-	// Clase del widget que aparece al morir el player. Se asigna WBP_GameOver desde el Blueprint child.
+	// Widget class shown when the player dies. WBP_GameOver is assigned from the Blueprint child.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Game Over")
 	TSubclassOf<UUserWidget> GameOverWidgetClass;
 
-	// Contexto de input por defecto (Combat)
+	// Default input context (Combat)
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	TObjectPtr<UInputMappingContext> DefaultMappingContext;
 
-	// Acción de movimiento 2D
+	// 2D movement action
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	TObjectPtr<UInputAction> MoveAction;
 
-	// Acción de ataque básico
+	// Basic attack action
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> AttackAction;
 
-	// Acción de ataque especial
+	// Special attack action
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> SpecialAttackAction;
 
-	// Acción de interacción (pulsar E para recoger llaves, abrir puertas, etc.)
+	// Interaction action (press E to pick up keys, open doors, etc.)
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> InteractAction;
 
-	// Acción para alternar Docked/Handheld (tecla M en PC). El IA está en IMC_Default.
+	// Action to toggle Docked/Handheld (M key on PC). The IA lives in IMC_Default.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> ToggleModeAction;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
 	TObjectPtr<UDPCombatComponent> CombatComponent;
 
-	// Esfera de detección de interactables a corta distancia
+	// Short-range interactable detection sphere
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Interaction")
 	TObjectPtr<USphereComponent> InteractionSphere;
 
-	// Interactable actualmente en range (último que ha entrado en la esfera y sigue dentro)
+	// Interactable currently in range (the most recent one that entered the sphere and is still inside)
 	UPROPERTY()
 	TObjectPtr<ADPInteractableBase> CurrentInteractable;
 
@@ -95,11 +95,11 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UCameraComponent> Camera;
 
-	// Timer para retrasar la aparición del Game Over hasta que termine DeathAnimation.
+	// Timer to delay the Game Over appearance until DeathAnimation finishes.
 	FTimerHandle GameOverTimerHandle;
 
-	// Muestra el widget de Game Over y bloquea input. Llamado tras la
-	// duración de DeathAnimation para que el feedback visual de muerte
-	// y la UI estén sincronizados
+	// Shows the Game Over widget and blocks input. Called after
+	// DeathAnimation's duration so the visual death feedback and the UI
+	// stay synchronized
 	void ShowGameOverScreen();
 };
